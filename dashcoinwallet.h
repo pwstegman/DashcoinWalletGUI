@@ -2,6 +2,8 @@
 #define DASHCOINWALLET_H
 
 #include <QMainWindow>
+#include <QProcess>
+#include <QNetworkReply>
 
 namespace Ui {
 class DashcoinWallet;
@@ -15,8 +17,15 @@ public:
     explicit DashcoinWallet(QWidget *parent = 0);
     ~DashcoinWallet();
 
+private slots:
+    void replyFinished(QNetworkReply *reply);
+    void daemonStarted();
+    void loadBlockHeight();
+
 private:
     Ui::DashcoinWallet *ui;
+    void loadFile();
+    QProcess *daemon;
 };
 
 #endif // DASHCOINWALLET_H
