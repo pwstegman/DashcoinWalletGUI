@@ -7,6 +7,8 @@
 #include <QNetworkReply>
 #include <QUrlQuery>
 #include <QTimer>
+#include <QPushButton>
+#include <QVboxLayout>
 
 DashcoinWallet::DashcoinWallet(QWidget *parent) :
     QMainWindow(parent),
@@ -14,6 +16,7 @@ DashcoinWallet::DashcoinWallet(QWidget *parent) :
 {
     ui->setupUi(this);
     loadFile();
+    showPasswordPrompt();
 }
 
 DashcoinWallet::~DashcoinWallet()
@@ -31,6 +34,9 @@ void DashcoinWallet::loadFile()
 void DashcoinWallet::daemonStarted(){
     qDebug() << "Started daemon";
     QTimer::singleShot(2000, this, SLOT(loadBlockHeight()));
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(loadBlockHeight()));
+    timer->start(15000);
 }
 
 void DashcoinWallet::loadBlockHeight(){
@@ -64,4 +70,8 @@ void DashcoinWallet::replyFinished(QNetworkReply *reply)
     int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     qDebug() << "Status code: " << statusCode;
     qDebug() << "Reply: " << str;
+}
+
+void DashcoinWallet::showPasswordPrompt(){
+    //TODO: Load wallet when password is entered
 }

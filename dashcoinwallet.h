@@ -25,6 +25,7 @@ private slots:
 private:
     Ui::DashcoinWallet *ui;
     void loadFile();
+    void showPasswordPrompt();
     QProcess *daemon;
 };
 
