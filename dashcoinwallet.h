@@ -21,12 +21,19 @@ private slots:
     void replyFinished(QNetworkReply *reply);
     void daemonStarted();
     void loadBlockHeight();
+    void killWalletGenerate();
+    void on_openWallet_btn_clicked();
+    void walletStarted();
+    void walletFinished();
 
 private:
     Ui::DashcoinWallet *ui;
     void loadFile();
     void showPasswordPrompt();
     QProcess *daemon;
+    QProcess *wallet;
+    QProcess *walletGenerate;
+    QString pass;
 };
 
 #endif // DASHCOINWALLET_H

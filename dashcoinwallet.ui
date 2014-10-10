@@ -154,7 +154,7 @@
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QLineEdit" name="lineEdit">
+                  <widget class="QLineEdit" name="password_txt">
                    <property name="text">
                     <string/>
                    </property>
@@ -173,7 +173,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="pushButton">
+                  <widget class="QPushButton" name="openWallet_btn">
                    <property name="text">
                     <string>Open Wallet</string>
                    </property>
