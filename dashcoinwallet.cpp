@@ -53,7 +53,7 @@ void DashcoinWallet::loadBlockHeight(){
     params.addQueryItem("id", "dashcoinguiwallet");
     params.addQueryItem("method","getblockcount");
     connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(replyFinished(QNetworkReply *)));
-    manager->post(request, params.query(QUrl::FullyEncoded).toUtf8());
+    manager->post(request, params.query(QUrl::FullyEncoded).toUtf8());2
     */
 
     QNetworkAccessManager *manager;
@@ -74,4 +74,41 @@ void DashcoinWallet::replyFinished(QNetworkReply *reply)
 
 void DashcoinWallet::showPasswordPrompt(){
     //TODO: Load wallet when password is entered
+}
+
+void DashcoinWallet::on_openWallet_btn_clicked()
+{
+    //they clicked the open wallet button
+    pass = ui->password_txt->text();
+    wallet = new QProcess(this);
+    connect(wallet, SIGNAL(started()),this, SLOT(walletStarted()));
+    connect(wallet, SIGNAL(finished(int , QProcess::ExitStatus)),this, SLOT(walletFinished()));
+    QFile walletFile(QDir::currentPath ()+"/wallet.bin");
+    if(!walletFile.exists()){
+        qDebug() << "No wallet found, generating new one...";
+        walletGenerate = new QProcess(this);
+        walletGenerate->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--generate-new-wallet" << "wallet.bin" << "--password" << pass);
+        QTimer::singleShot(2000, this, SLOT(killWalletGenerate()));
+    }else{
+        qDebug() << "Found wallet, connecting now.3";
+        wallet->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--wallet-file=wallet.bin" << "--pass="+pass << "--rpc-bind-port=49253");
+    }
+}
+
+void DashcoinWallet::killWalletGenerate()
+{
+    qDebug() << "Generated wallet file wallet.bin. Now starting wallet server on port 49253...";
+    walletGenerate->kill();
+    wallet->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--wallet-file=wallet.bin" << "--pass="+pass << "--rpc-bind-port=49253");
+    pass = "";
+}
+
+void DashcoinWallet::walletStarted()
+{
+    qDebug() << "Wallet started yay!";
+}
+
+void DashcoinWallet::walletFinished()
+{
+    qDebug() << "Wallet disconnected";
 }
