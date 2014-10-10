@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QProcess>
 #include <QNetworkReply>
+#include <QLabel>
 
 namespace Ui {
 class DashcoinWallet;
@@ -33,6 +34,8 @@ private:
     QProcess *wallet;
     QProcess *walletGenerate;
     QString pass;
+    QLabel *syncLabel;
+    QLabel *messageLabel;
 };
 
 #endif // DASHCOINWALLET_H

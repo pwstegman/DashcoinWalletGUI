@@ -15,6 +15,12 @@ DashcoinWallet::DashcoinWallet(QWidget *parent) :
     ui(new Ui::DashcoinWallet)
 {
     ui->setupUi(this);
+    syncLabel = new QLabel(this);
+    messageLabel = new QLabel(this);
+    syncLabel->setContentsMargins(9,0,9,0);
+    messageLabel->setContentsMargins(9,0,9,0);
+    ui->statusBar->addPermanentWidget(syncLabel);
+    ui->statusBar->addPermanentWidget(messageLabel,1);
     loadFile();
 }
 
@@ -31,7 +37,7 @@ void DashcoinWallet::loadFile()
 }
 
 void DashcoinWallet::daemonStarted(){
-    qDebug() << "Started daemon";
+    syncLabel->setText("Starting sync...");
     QTimer::singleShot(2000, this, SLOT(loadBlockHeight()));
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(loadBlockHeight()));
@@ -39,8 +45,6 @@ void DashcoinWallet::daemonStarted(){
 }
 
 void DashcoinWallet::loadBlockHeight(){
-    qDebug() << "Loading block height";
-
     /*
      * POST Request not working yet
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
@@ -81,19 +85,19 @@ void DashcoinWallet::on_openWallet_btn_clicked()
     connect(wallet, SIGNAL(finished(int , QProcess::ExitStatus)),this, SLOT(walletFinished()));
     QFile walletFile(QDir::currentPath ()+"/wallet.bin");
     if(!walletFile.exists()){
-        ui->statusBar->showMessage("No wallet found. Generating new wallet...");
+        messageLabel->setText("No wallet found. Generating new wallet...");
         walletGenerate = new QProcess(this);
         walletGenerate->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--generate-new-wallet" << "wallet.bin" << "--password" << pass);
         QTimer::singleShot(2000, this, SLOT(killWalletGenerate()));
     }else{
-        ui->statusBar->showMessage("Opening wallet...");
+        messageLabel->setText("Opening wallet...");
         wallet->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--wallet-file=wallet.bin" << "--pass="+pass << "--rpc-bind-port=49253");
     }
 }
 
 void DashcoinWallet::killWalletGenerate()
 {
-    ui->statusBar->showMessage("Generated wallet file wallet.bin. Now starting wallet server on port 49253.");
+    messageLabel->setText("Generated wallet file wallet.bin. Now starting wallet server on port 49253.");
     walletGenerate->kill();
     wallet->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--wallet-file=wallet.bin" << "--pass="+pass << "--rpc-bind-port=49253");
     pass = "";
@@ -101,10 +105,10 @@ void DashcoinWallet::killWalletGenerate()
 
 void DashcoinWallet::walletStarted()
 {
-    ui->statusBar->showMessage("Wallet connected");
+    messageLabel->setText("Wallet connected");
 }
 
 void DashcoinWallet::walletFinished()
 {
-    ui->statusBar->showMessage("Wallet disconnected. Please enter password to reconnect.");
+    messageLabel->setText("Wallet disconnected. Please enter password to reconnect.");
 }
