@@ -1,4 +1,4 @@
-DashcoinWalletGUI
+Dashcoin Wallet GUI
 =================
 
 Wallet GUI for Dashcoin.
