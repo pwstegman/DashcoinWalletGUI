@@ -44,7 +44,7 @@ void DashcoinWallet::loadFile()
 
 void DashcoinWallet::daemonStarted(){
     daemonRunning = true;
-    syncLabel->setText("Starting sync...");
+    syncLabel->setText("Starting daemon...");
     QTimer::singleShot(3000, this, SLOT(loadBlockHeight()));
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(loadBlockHeight()));
@@ -88,14 +88,19 @@ void DashcoinWallet::loadBlockHeight(){
 
 void DashcoinWallet::replyFinished(QNetworkReply *reply)
 {
-    QByteArray bytes = reply->readAll();
-    QString str = QString::fromUtf8(bytes.data(), bytes.size());
-    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    qDebug() << "Status code: " << statusCode;
-    qDebug() << "Reply: " << str;
-    QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
-    QJsonObject jsonObj = jsonResponse.object();
-    qDebug() << "Reply:" << jsonObj;
+    if(tryingToClose == false){
+        QByteArray bytes = reply->readAll();
+        QString str = QString::fromUtf8(bytes.data(), bytes.size());
+        QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
+        QJsonObject jsonObj = jsonResponse.object();
+        QString status = jsonObj["status"].toString();
+        QString height = QString::number(jsonObj["height"].toInt());
+        if(status == "OK"){
+            syncLabel->setText("Synced with network. Height: "+height);
+        }else{
+            syncLabel->setText("Syncing with network. Please wait.");
+        }
+    }
 }
 
 void DashcoinWallet::on_openWallet_btn_clicked()
@@ -136,17 +141,6 @@ void DashcoinWallet::walletFinished()
     messageLabel->setText("Wallet disconnected. Please enter password to reconnect.");
 }
 
-/*void DashcoinWallet::closing(){
-    //The program is being closed
-    daemon->write("exit\n");
-}*/
-
-void DashcoinWallet::on_closeDaemon_btn_clicked()
-{
-    qDebug() << "Sent exit command";
-    daemon->write("exit\n");
-}
-
 void DashcoinWallet::closeEvent(QCloseEvent *event)
  {
      /*if (maybeSave()) {
@@ -160,6 +154,7 @@ void DashcoinWallet::closeEvent(QCloseEvent *event)
         if(tryingToClose == false){
             daemon->write("exit\n");
             tryingToClose = true;
+            syncLabel->setText("Saving blockchain...");
         }
         event->ignore();
     }else{
