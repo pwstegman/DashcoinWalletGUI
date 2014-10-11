@@ -11,12 +11,15 @@
 #include <QVboxLayout>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QCloseEvent>
 
 DashcoinWallet::DashcoinWallet(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::DashcoinWallet)
 {
     ui->setupUi(this);
+    tryingToClose = false;
+    daemonRunning = false;
     syncLabel = new QLabel(this);
     messageLabel = new QLabel(this);
     syncLabel->setContentsMargins(9,0,9,0);
@@ -35,15 +38,27 @@ void DashcoinWallet::loadFile()
 {
     daemon = new QProcess(this);
     connect(daemon, SIGNAL(started()),this, SLOT(daemonStarted()));
+    connect(daemon, SIGNAL(finished(int , QProcess::ExitStatus)),this, SLOT(daemonFinished()));
     daemon->start(QDir::currentPath ()+"/dashcoind", QStringList() << "");
 }
 
 void DashcoinWallet::daemonStarted(){
+    daemonRunning = true;
     syncLabel->setText("Starting sync...");
     QTimer::singleShot(3000, this, SLOT(loadBlockHeight()));
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(loadBlockHeight()));
     timer->start(15000);
+}
+
+void DashcoinWallet::daemonFinished()
+{
+    daemonRunning = false;
+    qDebug() << "daemon finished";
+    if(tryingToClose == true){
+        qDebug() << "quitting";
+        qApp->quit();
+    }
 }
 
 void DashcoinWallet::loadBlockHeight(){
@@ -62,10 +77,12 @@ void DashcoinWallet::loadBlockHeight(){
     manager->post(request, params.query(QUrl::FullyEncoded).toUtf8());2
     */
 
-    /*QNetworkAccessManager *manager;
-    manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
-    manager->get(QNetworkRequest(QUrl("http://127.0.0.1:29081/getheight")));*/
+    if(daemonRunning){
+        QNetworkAccessManager *manager;
+        manager = new QNetworkAccessManager(this);
+        connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+        manager->get(QNetworkRequest(QUrl("http://127.0.0.1:29081/getheight")));
+    }
 
 }
 
@@ -78,7 +95,7 @@ void DashcoinWallet::replyFinished(QNetworkReply *reply)
     qDebug() << "Reply: " << str;
     QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
     QJsonObject jsonObj = jsonResponse.object();
-    qDebug() << "Reply:" << jsonObj["Reply"].toObject()["status"].toString();
+    qDebug() << "Reply:" << jsonObj;
 }
 
 void DashcoinWallet::on_openWallet_btn_clicked()
@@ -119,13 +136,33 @@ void DashcoinWallet::walletFinished()
     messageLabel->setText("Wallet disconnected. Please enter password to reconnect.");
 }
 
-void DashcoinWallet::closing(){
+/*void DashcoinWallet::closing(){
     //The program is being closed
     daemon->write("exit\n");
-}
+}*/
 
 void DashcoinWallet::on_closeDaemon_btn_clicked()
 {
     qDebug() << "Sent exit command";
     daemon->write("exit\n");
 }
+
+void DashcoinWallet::closeEvent(QCloseEvent *event)
+ {
+     /*if (maybeSave()) {
+         writeSettings();
+         event->accept();
+     } else {
+         event->ignore();
+     }*/
+    qDebug() << "exiting now event";
+    if(daemonRunning == true){
+        if(tryingToClose == false){
+            daemon->write("exit\n");
+            tryingToClose = true;
+        }
+        event->ignore();
+    }else{
+        event->accept();
+    }
+ }

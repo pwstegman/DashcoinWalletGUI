@@ -18,16 +18,19 @@ public:
     explicit DashcoinWallet(QWidget *parent = 0);
     ~DashcoinWallet();
 
+protected:
+    void closeEvent(QCloseEvent *event);
 
 private slots:
     void replyFinished(QNetworkReply *reply);
     void daemonStarted();
+    void daemonFinished();
     void loadBlockHeight();
     void killWalletGenerate();
     void on_openWallet_btn_clicked();
     void walletStarted();
     void walletFinished();
-    void closing();
+    //void closing();
 
     void on_closeDaemon_btn_clicked();
 
@@ -40,6 +43,8 @@ private:
     QString pass;
     QLabel *syncLabel;
     QLabel *messageLabel;
+    bool tryingToClose;
+    bool daemonRunning;
 };
 
 #endif // DASHCOINWALLET_H
