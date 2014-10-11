@@ -18,6 +18,7 @@ public:
     explicit DashcoinWallet(QWidget *parent = 0);
     ~DashcoinWallet();
 
+
 private slots:
     void replyFinished(QNetworkReply *reply);
     void daemonStarted();
@@ -26,6 +27,9 @@ private slots:
     void on_openWallet_btn_clicked();
     void walletStarted();
     void walletFinished();
+    void closing();
+
+    void on_closeDaemon_btn_clicked();
 
 private:
     Ui::DashcoinWallet *ui;

@@ -9,6 +9,8 @@
 #include <QTimer>
 #include <QPushButton>
 #include <QVboxLayout>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 DashcoinWallet::DashcoinWallet(QWidget *parent) :
     QMainWindow(parent),
@@ -33,18 +35,19 @@ void DashcoinWallet::loadFile()
 {
     daemon = new QProcess(this);
     connect(daemon, SIGNAL(started()),this, SLOT(daemonStarted()));
-    daemon->start(QDir::currentPath ()+"/dashcoind", QStringList() << "--no-console");
+    daemon->start(QDir::currentPath ()+"/dashcoind", QStringList() << "");
 }
 
 void DashcoinWallet::daemonStarted(){
     syncLabel->setText("Starting sync...");
-    QTimer::singleShot(2000, this, SLOT(loadBlockHeight()));
+    QTimer::singleShot(3000, this, SLOT(loadBlockHeight()));
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(loadBlockHeight()));
     timer->start(15000);
 }
 
 void DashcoinWallet::loadBlockHeight(){
+    qDebug() << "Loading block height";
     /*
      * POST Request not working yet
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
@@ -59,10 +62,10 @@ void DashcoinWallet::loadBlockHeight(){
     manager->post(request, params.query(QUrl::FullyEncoded).toUtf8());2
     */
 
-    QNetworkAccessManager *manager;
+    /*QNetworkAccessManager *manager;
     manager = new QNetworkAccessManager(this);
     connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
-    manager->get(QNetworkRequest(QUrl("http://127.0.0.1:29081/getheight")));
+    manager->get(QNetworkRequest(QUrl("http://127.0.0.1:29081/getheight")));*/
 
 }
 
@@ -73,6 +76,9 @@ void DashcoinWallet::replyFinished(QNetworkReply *reply)
     int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     qDebug() << "Status code: " << statusCode;
     qDebug() << "Reply: " << str;
+    QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
+    QJsonObject jsonObj = jsonResponse.object();
+    qDebug() << "Reply:" << jsonObj["Reply"].toObject()["status"].toString();
 }
 
 void DashcoinWallet::on_openWallet_btn_clicked()
@@ -111,4 +117,15 @@ void DashcoinWallet::walletStarted()
 void DashcoinWallet::walletFinished()
 {
     messageLabel->setText("Wallet disconnected. Please enter password to reconnect.");
+}
+
+void DashcoinWallet::closing(){
+    //The program is being closed
+    daemon->write("exit\n");
+}
+
+void DashcoinWallet::on_closeDaemon_btn_clicked()
+{
+    qDebug() << "Sent exit command";
+    daemon->write("exit\n");
 }
