@@ -42,6 +42,7 @@ private:
     QLabel *messageLabel;
     bool tryingToClose;
     bool daemonRunning;
+    bool walletRunning;
 };
 
 #endif // DASHCOINWALLET_H

@@ -20,6 +20,7 @@ DashcoinWallet::DashcoinWallet(QWidget *parent) :
     ui->setupUi(this);
     tryingToClose = false;
     daemonRunning = false;
+    walletRunning = false;
     syncLabel = new QLabel(this);
     messageLabel = new QLabel(this);
     syncLabel->setContentsMargins(9,0,9,0);
@@ -123,19 +124,24 @@ void DashcoinWallet::killWalletGenerate()
 
 void DashcoinWallet::walletStarted()
 {
+    walletRunning = true;
     ui->passwordBox->hide();
     messageLabel->setText("Wallet connected");
 }
 
 void DashcoinWallet::walletFinished()
 {
+    walletRunning = false;
     ui->passwordBox->show();
-    messageLabel->setText("Wallet disconnected. Please enter password to reconnect.");
+    messageLabel->setText("Wallet disconnected");
 }
 
 void DashcoinWallet::closeEvent(QCloseEvent *event)
  {
     qDebug() << "exiting now event";
+    if(walletRunning == true){
+        wallet->kill();
+    }
     if(daemonRunning == true){
         if(tryingToClose == false){
             daemon->write("exit\n");
