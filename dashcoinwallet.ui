@@ -71,7 +71,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>2</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideNone</enum>
@@ -346,7 +346,11 @@
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="address_txt"/>
+                  <widget class="QLineEdit" name="address_txt">
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_5">
@@ -356,7 +360,11 @@
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QLineEdit" name="paymentid_txt"/>
+                  <widget class="QLineEdit" name="paymentid_txt">
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="label_9">
@@ -379,6 +387,9 @@
                      <width>150</width>
                      <height>16777215</height>
                     </size>
+                   </property>
+                   <property name="buttonSymbols">
+                    <enum>QAbstractSpinBox::UpDownArrows</enum>
                    </property>
                    <property name="decimals">
                     <number>8</number>
@@ -476,7 +487,50 @@
             </widget>
            </item>
            <item>
-            <widget class="QWidget" name="widget_7" native="true"/>
+            <widget class="QWidget" name="widget_7" native="true">
+             <layout class="QFormLayout" name="formLayout_6">
+              <item row="0" column="0" colspan="2">
+               <widget class="QWidget" name="widget" native="true">
+                <layout class="QFormLayout" name="formLayout_5">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_11">
+                   <property name="font">
+                    <font>
+                     <pointsize>8</pointsize>
+                     <weight>50</weight>
+                     <italic>false</italic>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Address:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEdit">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
+                   <property name="text">
+                    <string>temporary placeholder</string>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                   <property name="clearButtonEnabled">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </item>
           </layout>
          </widget>
