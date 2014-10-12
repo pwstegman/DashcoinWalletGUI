@@ -62,7 +62,6 @@ void DashcoinWallet::daemonFinished()
 }
 
 void DashcoinWallet::loadBlockHeight(){
-    qDebug() << "Loading block height";
     /*
      * POST Request not working yet
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
@@ -133,11 +132,13 @@ void DashcoinWallet::killWalletGenerate()
 
 void DashcoinWallet::walletStarted()
 {
+    ui->passwordBox->hide();
     messageLabel->setText("Wallet connected");
 }
 
 void DashcoinWallet::walletFinished()
 {
+    ui->passwordBox->show();
     messageLabel->setText("Wallet disconnected. Please enter password to reconnect.");
 }
 
