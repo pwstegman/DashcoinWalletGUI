@@ -3,5 +3,10 @@ Dashcoin Wallet GUI
 
 Wallet GUI for Dashcoin.
 
-Currently syncs blockchain with network and can load/generate a wallet.
+<ul>
+<li>Syncs blockchain with network</li>
+<li>Can load/generate a wallet</li>
+<li>Loads balance</li>
+</ul>
+
 This is still a work in progress, and is not ready for use yet.
