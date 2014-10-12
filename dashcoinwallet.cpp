@@ -48,7 +48,7 @@ void DashcoinWallet::daemonStarted(){
     QTimer::singleShot(3000, this, SLOT(loadBlockHeight()));
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(loadBlockHeight()));
-    timer->start(15000);
+    timer->start(10000);
 }
 
 void DashcoinWallet::daemonFinished()
@@ -62,25 +62,15 @@ void DashcoinWallet::daemonFinished()
 }
 
 void DashcoinWallet::loadBlockHeight(){
-    /*
-     * POST Request not working yet
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    QUrl url("http://127.0.0.1:29081/json_rpc");
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    QUrlQuery params;
-    params.addQueryItem("jsonrpc", "2.0");
-    params.addQueryItem("id", "dashcoinguiwallet");
-    params.addQueryItem("method","getblockcount");
-    connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(replyFinished(QNetworkReply *)));
-    manager->post(request, params.query(QUrl::FullyEncoded).toUtf8());2
-    */
-
     if(daemonRunning){
-        QNetworkAccessManager *manager;
-        manager = new QNetworkAccessManager(this);
-        connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
-        manager->get(QNetworkRequest(QUrl("http://127.0.0.1:29081/getheight")));
+        QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+        connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(replyFinished(QNetworkReply*)));
+        QString dataStr = "{\"jsonrpc\": \"2.0\", \"method\":\"getblockcount\", \"id\": \"test\"}";
+        QJsonDocument jsonData = QJsonDocument::fromJson(dataStr.toUtf8());
+        QByteArray data = jsonData.toJson();
+        QNetworkRequest request = QNetworkRequest(QUrl("http://127.0.0.1:29081/json_rpc"));
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
+        manager->post(request, data);
     }
 
 }
@@ -91,14 +81,15 @@ void DashcoinWallet::replyFinished(QNetworkReply *reply)
         QByteArray bytes = reply->readAll();
         QString str = QString::fromUtf8(bytes.data(), bytes.size());
         QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
-        QJsonObject jsonObj = jsonResponse.object();
+        QJsonObject jsonObj = jsonResponse.object()["result"].toObject();
         QString status = jsonObj["status"].toString();
-        QString height = QString::number(jsonObj["height"].toInt());
+        QString height = QString::number(jsonObj["count"].toInt());
         if(status == "OK"){
             syncLabel->setText("Synced with network. Height: "+height);
         }else{
             syncLabel->setText("Syncing with network. Please wait.");
         }
+        qDebug() << "Data loaded: " << str;
     }
 }
 
@@ -144,12 +135,6 @@ void DashcoinWallet::walletFinished()
 
 void DashcoinWallet::closeEvent(QCloseEvent *event)
  {
-     /*if (maybeSave()) {
-         writeSettings();
-         event->accept();
-     } else {
-         event->ignore();
-     }*/
     qDebug() << "exiting now event";
     if(daemonRunning == true){
         if(tryingToClose == false){
