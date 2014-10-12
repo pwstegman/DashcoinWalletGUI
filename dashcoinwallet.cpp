@@ -21,6 +21,8 @@ DashcoinWallet::DashcoinWallet(QWidget *parent) :
     tryingToClose = false;
     daemonRunning = false;
     walletRunning = false;
+    synced = false;
+    ui->balance->hide();
     syncLabel = new QLabel(this);
     messageLabel = new QLabel(this);
     syncLabel->setContentsMargins(9,0,9,0);
@@ -45,7 +47,7 @@ void DashcoinWallet::loadFile()
 
 void DashcoinWallet::daemonStarted(){
     daemonRunning = true;
-    syncLabel->setText("Starting daemon...");
+    syncLabel->setText("Starting daemon");
     QTimer::singleShot(3000, this, SLOT(loadBlockHeight()));
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(loadBlockHeight()));
@@ -86,31 +88,38 @@ void DashcoinWallet::replyFinished(QNetworkReply *reply)
         QString status = jsonObj["status"].toString();
         QString height = QString::number(jsonObj["count"].toInt());
         if(status == "OK"){
+            if(synced == false){
+                messageLabel->setText("");
+                synced = true;
+            }
             syncLabel->setText("Synced with network. Height: "+height);
         }else{
-            syncLabel->setText("Syncing with network. Please wait.");
+            syncLabel->setText("Syncing with network");
         }
-        qDebug() << "Data loaded: " << str;
     }
 }
 
 void DashcoinWallet::on_openWallet_btn_clicked()
 {
     //they clicked the open wallet button
-    pass = ui->password_txt->text();
-    ui->password_txt->setText("");
-    wallet = new QProcess(this);
-    connect(wallet, SIGNAL(started()),this, SLOT(walletStarted()));
-    connect(wallet, SIGNAL(finished(int , QProcess::ExitStatus)),this, SLOT(walletFinished()));
-    QFile walletFile(QDir::currentPath ()+"/wallet.bin");
-    if(!walletFile.exists()){
-        messageLabel->setText("No wallet found. Generating new wallet...");
-        walletGenerate = new QProcess(this);
-        walletGenerate->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--generate-new-wallet" << "wallet.bin" << "--password" << pass);
-        QTimer::singleShot(2000, this, SLOT(killWalletGenerate()));
+    if(synced == true){
+        pass = ui->password_txt->text();
+        ui->password_txt->setText("");
+        wallet = new QProcess(this);
+        connect(wallet, SIGNAL(started()),this, SLOT(walletStarted()));
+        connect(wallet, SIGNAL(finished(int , QProcess::ExitStatus)),this, SLOT(walletFinished()));
+        QFile walletFile(QDir::currentPath ()+"/wallet.bin");
+        if(!walletFile.exists()){
+            messageLabel->setText("No wallet found. Generating new wallet...");
+            walletGenerate = new QProcess(this);
+            walletGenerate->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--generate-new-wallet" << "wallet.bin" << "--password" << pass);
+            QTimer::singleShot(2000, this, SLOT(killWalletGenerate()));
+        }else{
+            messageLabel->setText("Opening wallet...");
+            wallet->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--wallet-file=wallet.bin" << "--pass="+pass << "--rpc-bind-port=49253");
+        }
     }else{
-        messageLabel->setText("Opening wallet...");
-        wallet->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--wallet-file=wallet.bin" << "--pass="+pass << "--rpc-bind-port=49253");
+        messageLabel->setText("Please wait for the sync to complete");
     }
 }
 
@@ -125,14 +134,14 @@ void DashcoinWallet::killWalletGenerate()
 void DashcoinWallet::walletStarted()
 {
     walletRunning = true;
-    ui->passwordBox->hide();
+    showWallet();
     messageLabel->setText("Wallet connected");
 }
 
 void DashcoinWallet::walletFinished()
 {
     walletRunning = false;
-    ui->passwordBox->show();
+    hideWallet();
     messageLabel->setText("Wallet disconnected");
 }
 
@@ -153,3 +162,66 @@ void DashcoinWallet::closeEvent(QCloseEvent *event)
         event->accept();
     }
  }
+
+void DashcoinWallet::loadBalance()
+{
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(balanceReply(QNetworkReply*)));
+    QString dataStr = "{\"jsonrpc\": \"2.0\", \"method\":\"getbalance\", \"id\": \"test\"}";
+    QJsonDocument jsonData = QJsonDocument::fromJson(dataStr.toUtf8());
+    QByteArray data = jsonData.toJson();
+    QNetworkRequest request = QNetworkRequest(QUrl("http://127.0.0.1:49253/json_rpc"));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
+    manager->post(request, data);
+
+}
+
+void DashcoinWallet::balanceReply(QNetworkReply *reply)
+{
+    QByteArray bytes = reply->readAll();
+    QString str = QString::fromUtf8(bytes.data(), bytes.size());
+    QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
+    QJsonObject jsonObj = jsonResponse.object();
+    QString balance = QString::number(jsonObj["balance"].toInt());
+    QString unlocked_balance = QString::number(jsonObj["unlocked_balance"].toInt());
+    balance = fixBalance(balance);
+    unlocked_balance = fixBalance(unlocked_balance);
+    ui->balance_txt->setText(balance+" DSH");
+    ui->balance_unlocked_txt->setText(unlocked_balance+" DSH");
+    showAllWallet();
+}
+
+QString DashcoinWallet::fixBalance(QString str)
+{
+    if(str == "0"){
+        return "0";
+    }
+    QString left = "";
+    QString right = "";
+    if(str.length() <= 8){
+        str = QString((8-str.length()),'0')+str;
+        left = "0";
+    }else{
+        left = str.left(str.length()-8);
+    }
+    right = str.right(8);
+    right.remove(QRegExp("0+$"));
+    QString result = left+"."+right;
+    return result;
+}
+
+void DashcoinWallet::hideWallet()
+{
+    ui->passwordBox->show();
+    ui->balance->hide();
+}
+
+void DashcoinWallet::showWallet()
+{
+    ui->passwordBox->hide();
+    loadBalance();
+}
+void DashcoinWallet::showAllWallet()
+{
+    ui->balance->show();
+}
