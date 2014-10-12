@@ -218,10 +218,21 @@ void DashcoinWallet::hideWallet()
 void DashcoinWallet::showWallet()
 {
     ui->passwordBox->hide();
-    loadBalance();
+    loadWalletData();
 }
+
+void DashcoinWallet::loadWalletData(){
+    qDebug() << "Loaded wallet data";
+    if(walletRunning == true){
+        loadBalance();
+    }
+}
+
 void DashcoinWallet::showAllWallet()
 {
     messageLabel->setText("Wallet connected");
     ui->balance->show();
+    QTimer *walletTimer = new QTimer(this);
+    connect(walletTimer, SIGNAL(timeout()), this, SLOT(loadWalletData()));
+    walletTimer->start(10000);
 }

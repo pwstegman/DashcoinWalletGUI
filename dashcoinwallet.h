@@ -26,6 +26,7 @@ private slots:
     void daemonStarted();
     void daemonFinished();
     void loadBlockHeight();
+    void loadWalletData();
     void killWalletGenerate();
     void on_openWallet_btn_clicked();
     void walletStarted();
