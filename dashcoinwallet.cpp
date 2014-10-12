@@ -135,7 +135,6 @@ void DashcoinWallet::walletStarted()
 {
     walletRunning = true;
     showWallet();
-    messageLabel->setText("Wallet connected");
 }
 
 void DashcoinWallet::walletFinished()
@@ -223,5 +222,6 @@ void DashcoinWallet::showWallet()
 }
 void DashcoinWallet::showAllWallet()
 {
+    messageLabel->setText("Wallet connected");
     ui->balance->show();
 }
