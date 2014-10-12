@@ -22,7 +22,7 @@ DashcoinWallet::DashcoinWallet(QWidget *parent) :
     daemonRunning = false;
     walletRunning = false;
     synced = false;
-    ui->balance->hide();
+    hideWallet();
     syncLabel = new QLabel(this);
     messageLabel = new QLabel(this);
     syncLabel->setContentsMargins(9,0,9,0);
@@ -213,6 +213,7 @@ void DashcoinWallet::hideWallet()
 {
     ui->passwordBox->show();
     ui->balance->hide();
+    ui->sendForm->hide();
 }
 
 void DashcoinWallet::showWallet()
@@ -232,6 +233,7 @@ void DashcoinWallet::showAllWallet()
 {
     messageLabel->setText("Wallet connected");
     ui->balance->show();
+    ui->sendForm->show();
     QTimer *walletTimer = new QTimer(this);
     connect(walletTimer, SIGNAL(timeout()), this, SLOT(loadWalletData()));
     walletTimer->start(10000);
