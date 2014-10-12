@@ -141,6 +141,8 @@ void DashcoinWallet::walletFinished()
 {
     walletRunning = false;
     hideWallet();
+    showingWallet = false;
+    disconnect(balanceLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(balanceReply(QNetworkReply*)));
     messageLabel->setText("Wallet disconnected");
 }
 
@@ -164,14 +166,14 @@ void DashcoinWallet::closeEvent(QCloseEvent *event)
 
 void DashcoinWallet::loadBalance()
 {
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(balanceReply(QNetworkReply*)));
+    balanceLoad = new QNetworkAccessManager(this);
+    connect(balanceLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(balanceReply(QNetworkReply*)));
     QString dataStr = "{\"jsonrpc\": \"2.0\", \"method\":\"getbalance\", \"id\": \"test\"}";
     QJsonDocument jsonData = QJsonDocument::fromJson(dataStr.toUtf8());
     QByteArray data = jsonData.toJson();
     QNetworkRequest request = QNetworkRequest(QUrl("http://127.0.0.1:49253/json_rpc"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
-    manager->post(request, data);
+    balanceLoad->post(request, data);
 
 }
 
@@ -187,7 +189,10 @@ void DashcoinWallet::balanceReply(QNetworkReply *reply)
     unlocked_balance = fixBalance(unlocked_balance);
     ui->balance_txt->setText(balance+" DSH");
     ui->balance_unlocked_txt->setText(unlocked_balance+" DSH");
-    showAllWallet();
+    if(showingWallet == true){
+        showAllWallet();
+        showingWallet = false;
+    }
 }
 
 QString DashcoinWallet::fixBalance(QString str)
@@ -220,6 +225,7 @@ void DashcoinWallet::showWallet()
 {
     ui->passwordBox->hide();
     loadWalletData();
+    showingWallet = true;
 }
 
 void DashcoinWallet::loadWalletData(){
@@ -232,9 +238,19 @@ void DashcoinWallet::loadWalletData(){
 void DashcoinWallet::showAllWallet()
 {
     messageLabel->setText("Wallet connected");
+    qDebug() << "Started wallet timer";
     ui->balance->show();
     ui->sendForm->show();
     QTimer *walletTimer = new QTimer(this);
     connect(walletTimer, SIGNAL(timeout()), this, SLOT(loadWalletData()));
     walletTimer->start(10000);
+}
+
+void DashcoinWallet::on_send_btn_clicked()
+{
+    QString address = ui->address_txt->text();
+    QString paymentid = ui->paymentid_txt->text();
+    QString amount = ui->amount_txt->text();
+    QString fee = ui->fee_txt->text();
+    qDebug() << "Address: " << address << " Pid: " << paymentid << " Amount: " << amount << " Fee" << fee;
 }

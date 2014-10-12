@@ -33,6 +33,8 @@ private slots:
     void walletFinished();
     void balanceReply(QNetworkReply *reply);
 
+    void on_send_btn_clicked();
+
 private:
     Ui::DashcoinWallet *ui;
     void loadFile();
@@ -47,10 +49,12 @@ private:
     QString pass;
     QLabel *syncLabel;
     QLabel *messageLabel;
+    QNetworkAccessManager *balanceLoad;
     bool tryingToClose;
     bool daemonRunning;
     bool walletRunning;
     bool synced;
+    bool showingWallet;
 };
 
 #endif // DASHCOINWALLET_H

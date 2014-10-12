@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
+    <width>700</width>
     <height>481</height>
    </rect>
   </property>
@@ -14,6 +14,12 @@
    <size>
     <width>700</width>
     <height>400</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>700</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -65,7 +71,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideNone</enum>
@@ -340,7 +346,7 @@
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit"/>
+                  <widget class="QLineEdit" name="address_txt"/>
                  </item>
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_5">
@@ -350,7 +356,7 @@
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QLineEdit" name="lineEdit_2"/>
+                  <widget class="QLineEdit" name="paymentid_txt"/>
                  </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="label_9">
@@ -367,7 +373,7 @@
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox">
+                  <widget class="QDoubleSpinBox" name="amount_txt">
                    <property name="maximumSize">
                     <size>
                      <width>150</width>
@@ -386,7 +392,7 @@
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+                  <widget class="QDoubleSpinBox" name="fee_txt">
                    <property name="maximumSize">
                     <size>
                      <width>150</width>
@@ -398,6 +404,19 @@
                    </property>
                    <property name="value">
                     <double>15.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QPushButton" name="send_btn">
+                   <property name="maximumSize">
+                    <size>
+                     <width>150</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Send Dashcoin</string>
                    </property>
                   </widget>
                  </item>
@@ -525,7 +544,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>750</width>
+     <width>700</width>
      <height>21</height>
     </rect>
    </property>
