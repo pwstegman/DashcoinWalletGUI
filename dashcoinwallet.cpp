@@ -300,8 +300,28 @@ void DashcoinWallet::transactionsReply(QNetworkReply *reply)
     QString str = QString::fromUtf8(bytes.data(), bytes.size()).simplified();
     str.replace(QRegularExpression("(?<=:)\\s()(?=\\d)"),"\"");
     str.replace(QRegularExpression("(?<=\\d)(?=[, ])"),"\"");
-    qDebug() << str;
-    /*QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
+    QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
     QJsonArray jsonObj = jsonResponse.object()["result"].toObject()["transfers"].toArray();
-    */
+    QString amount = "";
+    QString address = "";
+    QString fee = "";
+    QString txhash = "";
+    ui->transactions_table->setRowCount(jsonObj.size());
+    for(int i=0;i<jsonObj.size();i++){
+        QString address_str = jsonObj.at(i).toObject()["address"].toString();
+        QTableWidgetItem *amount =  new QTableWidgetItem(fixBalance(jsonObj.at(i).toObject()["amount"].toString())+" DSH");
+        QTableWidgetItem *address = new QTableWidgetItem(address_str);
+        QTableWidgetItem *fee = new QTableWidgetItem(fixBalance(jsonObj.at(i).toObject()["fee"].toString())+ " DSH");
+        QTableWidgetItem *txhash =  new QTableWidgetItem(jsonObj.at(i).toObject()["transactionHash"].toString());
+        QString type_str = "Send";
+        if(address_str == ""){
+            type_str = "Receive";
+        }
+        QTableWidgetItem *type = new QTableWidgetItem(type_str);
+        ui->transactions_table->setItem(i,1,type);
+        ui->transactions_table->setItem(i,2,amount);
+        ui->transactions_table->setItem(i, 3, fee);
+        ui->transactions_table->setItem(i,4,txhash);
+        ui->transactions_table->setItem(i,5,address);
+    }
 }

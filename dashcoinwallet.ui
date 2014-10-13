@@ -71,7 +71,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideNone</enum>
@@ -590,7 +590,7 @@
                  <enum>QFrame::Sunken</enum>
                 </property>
                 <property name="columnCount">
-                 <number>5</number>
+                 <number>6</number>
                 </property>
                 <column>
                  <property name="text">
@@ -610,6 +610,11 @@
                 <column>
                  <property name="text">
                   <string>Fee</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Transaction Hash</string>
                  </property>
                 </column>
                 <column>
