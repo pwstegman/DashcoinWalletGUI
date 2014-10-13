@@ -12,6 +12,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QCloseEvent>
+#include <QJsonArray>
+#include <QRegularExpression>
 
 DashcoinWallet::DashcoinWallet(QWidget *parent) :
     QMainWindow(parent),
@@ -143,6 +145,7 @@ void DashcoinWallet::walletFinished()
     hideWallet();
     showingWallet = false;
     disconnect(balanceLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(balanceReply(QNetworkReply*)));
+    //disconnect(transactionsLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(transactionsReply(QNetworkReply*)));
     messageLabel->setText("Wallet disconnected");
 }
 
@@ -166,6 +169,7 @@ void DashcoinWallet::closeEvent(QCloseEvent *event)
 
 void DashcoinWallet::loadBalance()
 {
+    qDebug() << "Loading balance";
     balanceLoad = new QNetworkAccessManager(this);
     connect(balanceLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(balanceReply(QNetworkReply*)));
     QString dataStr = "{\"jsonrpc\": \"2.0\", \"method\":\"getbalance\", \"id\": \"test\"}";
@@ -180,11 +184,13 @@ void DashcoinWallet::loadBalance()
 void DashcoinWallet::balanceReply(QNetworkReply *reply)
 {
     QByteArray bytes = reply->readAll();
-    QString str = QString::fromUtf8(bytes.data(), bytes.size());
+    QString str = QString::fromUtf8(bytes.data(), bytes.size()).simplified();
+    str.replace(QRegularExpression("(?<=:)\\s()(?=\\d)"),"\"");
+    str.replace(QRegularExpression("(?<=\\d)(?=[, ])"),"\"");
     QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
-    QJsonObject jsonObj = jsonResponse.object();
-    QString balance = QString::number(jsonObj["balance"].toInt());
-    QString unlocked_balance = QString::number(jsonObj["unlocked_balance"].toInt());
+    QJsonObject jsonObj = jsonResponse.object()["result"].toObject();
+    QString balance = jsonObj["balance"].toString();
+    QString unlocked_balance = jsonObj["unlocked_balance"].toString();
     balance = fixBalance(balance);
     unlocked_balance = fixBalance(unlocked_balance);
     ui->balance_txt->setText(balance+" DSH");
@@ -209,7 +215,10 @@ QString DashcoinWallet::fixBalance(QString str)
         left = str.left(str.length()-8);
     }
     right = str.right(8);
-    right.remove(QRegExp("0+$"));
+    right.remove(QRegularExpression("0+$"));
+    if(right == ""){
+        right = "0";
+    }
     QString result = left+"."+right;
     return result;
 }
@@ -235,6 +244,7 @@ void DashcoinWallet::loadWalletData(){
     if(walletRunning == true){
         loadBalance();
         loadAddress();
+        //loadTransactions();
     }
 }
 
@@ -270,4 +280,37 @@ void DashcoinWallet::loadAddress()
         ui->in_address_txt->setText(in.readLine());
     }
 
+}
+
+void DashcoinWallet::loadTransactions()
+{
+    transactionsLoad = new QNetworkAccessManager(this);
+    connect(transactionsLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(transactionsReply(QNetworkReply*)));
+    QString dataStr = "{\"jsonrpc\": \"2.0\", \"method\":\"get_transfers\", \"id\": \"test\"}";
+    QJsonDocument jsonData = QJsonDocument::fromJson(dataStr.toUtf8());
+    QByteArray data = jsonData.toJson();
+    QNetworkRequest request = QNetworkRequest(QUrl("http://127.0.0.1:49253/json_rpc"));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
+    transactionsLoad->post(request, data);
+}
+
+void DashcoinWallet::transactionsReply(QNetworkReply *reply)
+{
+    QByteArray bytes = reply->readAll();
+    QString str = QString::fromUtf8(bytes.data(), bytes.size());
+    QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
+    QJsonArray jsonObj = jsonResponse.object()["result"].toObject()["transfers"].toArray();
+    ui->transactions_table->clear();
+    QString date = "";
+    QString amount = "";
+    QString fee = "";
+    QString address = "";
+    qDebug() << "TXS: " << str;
+    for(int i=0;i<jsonObj.size();i++){
+        amount = QString::number(jsonObj[i].toObject()["amount"].toInt());
+        date = QString::number(jsonObj[i].toObject()["time"].toInt());
+        fee = QString::number(jsonObj[i].toObject()["fee"].toInt());
+        address = jsonObj[i].toObject()["address"].toString();
+        qDebug() << "Amount: " << amount << " Fee: " << fee << " Date: " << date << " Address: " << address;
+    }
 }

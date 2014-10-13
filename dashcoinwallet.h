@@ -32,7 +32,7 @@ private slots:
     void walletStarted();
     void walletFinished();
     void balanceReply(QNetworkReply *reply);
-
+    void transactionsReply(QNetworkReply *reply);
     void on_send_btn_clicked();
 
 private:
@@ -43,6 +43,7 @@ private:
     void showWallet();
     void showAllWallet();
     void loadAddress();
+    void loadTransactions();
     QString fixBalance(QString str);
     QProcess *daemon;
     QProcess *wallet;
@@ -51,6 +52,7 @@ private:
     QLabel *syncLabel;
     QLabel *messageLabel;
     QNetworkAccessManager *balanceLoad;
+    QNetworkAccessManager *transactionsLoad;
     bool tryingToClose;
     bool daemonRunning;
     bool walletRunning;
