@@ -219,6 +219,8 @@ void DashcoinWallet::hideWallet()
     ui->passwordBox->show();
     ui->balance->hide();
     ui->sendForm->hide();
+    ui->in_address->hide();
+    ui->transactions_table->hide();
 }
 
 void DashcoinWallet::showWallet()
@@ -232,6 +234,7 @@ void DashcoinWallet::loadWalletData(){
     qDebug() << "Loaded wallet data";
     if(walletRunning == true){
         loadBalance();
+        loadAddress();
     }
 }
 
@@ -241,6 +244,8 @@ void DashcoinWallet::showAllWallet()
     qDebug() << "Started wallet timer";
     ui->balance->show();
     ui->sendForm->show();
+    ui->in_address->show();
+    ui->transactions_table->show();
     QTimer *walletTimer = new QTimer(this);
     connect(walletTimer, SIGNAL(timeout()), this, SLOT(loadWalletData()));
     walletTimer->start(10000);
@@ -253,4 +258,16 @@ void DashcoinWallet::on_send_btn_clicked()
     QString amount = ui->amount_txt->text();
     QString fee = ui->fee_txt->text();
     qDebug() << "Address: " << address << " Pid: " << paymentid << " Amount: " << amount << " Fee" << fee;
+}
+
+void DashcoinWallet::loadAddress()
+{
+    QFile addressFile(QDir::currentPath ()+"/wallet.bin.address.txt");
+    if(!addressFile.exists() || !addressFile.open(QIODevice::ReadOnly)){
+        ui->in_address_txt->setText("Cannot load address");
+    }else{
+        QTextStream in(&addressFile);
+        ui->in_address_txt->setText(in.readLine());
+    }
+
 }

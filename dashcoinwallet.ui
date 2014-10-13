@@ -71,7 +71,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>2</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideNone</enum>
@@ -490,7 +490,7 @@
             <widget class="QWidget" name="widget_7" native="true">
              <layout class="QFormLayout" name="formLayout_6">
               <item row="0" column="0" colspan="2">
-               <widget class="QWidget" name="widget" native="true">
+               <widget class="QWidget" name="in_address" native="true">
                 <layout class="QFormLayout" name="formLayout_5">
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_11">
@@ -508,7 +508,7 @@
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit">
+                  <widget class="QLineEdit" name="in_address_txt">
                    <property name="enabled">
                     <bool>true</bool>
                    </property>
@@ -516,7 +516,7 @@
                     <enum>Qt::NoFocus</enum>
                    </property>
                    <property name="text">
-                    <string>temporary placeholder</string>
+                    <string/>
                    </property>
                    <property name="readOnly">
                     <bool>true</bool>
@@ -585,7 +585,7 @@
             <widget class="QWidget" name="widget_9" native="true">
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <widget class="QTableWidget" name="tableWidget">
+               <widget class="QTableWidget" name="transactions_table">
                 <property name="frameShadow">
                  <enum>QFrame::Sunken</enum>
                 </property>

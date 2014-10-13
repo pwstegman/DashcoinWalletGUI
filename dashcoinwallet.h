@@ -42,6 +42,7 @@ private:
     void hideWallet();
     void showWallet();
     void showAllWallet();
+    void loadAddress();
     QString fixBalance(QString str);
     QProcess *daemon;
     QProcess *wallet;
