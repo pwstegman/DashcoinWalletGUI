@@ -145,7 +145,7 @@ void DashcoinWallet::walletFinished()
     hideWallet();
     showingWallet = false;
     disconnect(balanceLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(balanceReply(QNetworkReply*)));
-    //disconnect(transactionsLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(transactionsReply(QNetworkReply*)));
+    disconnect(transactionsLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(transactionsReply(QNetworkReply*)));
     messageLabel->setText("Wallet disconnected");
 }
 
@@ -244,7 +244,7 @@ void DashcoinWallet::loadWalletData(){
     if(walletRunning == true){
         loadBalance();
         loadAddress();
-        //loadTransactions();
+        loadTransactions();
     }
 }
 
@@ -297,20 +297,11 @@ void DashcoinWallet::loadTransactions()
 void DashcoinWallet::transactionsReply(QNetworkReply *reply)
 {
     QByteArray bytes = reply->readAll();
-    QString str = QString::fromUtf8(bytes.data(), bytes.size());
-    QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
+    QString str = QString::fromUtf8(bytes.data(), bytes.size()).simplified();
+    str.replace(QRegularExpression("(?<=:)\\s()(?=\\d)"),"\"");
+    str.replace(QRegularExpression("(?<=\\d)(?=[, ])"),"\"");
+    qDebug() << str;
+    /*QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
     QJsonArray jsonObj = jsonResponse.object()["result"].toObject()["transfers"].toArray();
-    ui->transactions_table->clear();
-    QString date = "";
-    QString amount = "";
-    QString fee = "";
-    QString address = "";
-    qDebug() << "TXS: " << str;
-    for(int i=0;i<jsonObj.size();i++){
-        amount = QString::number(jsonObj[i].toObject()["amount"].toInt());
-        date = QString::number(jsonObj[i].toObject()["time"].toInt());
-        fee = QString::number(jsonObj[i].toObject()["fee"].toInt());
-        address = jsonObj[i].toObject()["address"].toString();
-        qDebug() << "Amount: " << amount << " Fee: " << fee << " Date: " << date << " Address: " << address;
-    }
+    */
 }
