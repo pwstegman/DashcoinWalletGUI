@@ -302,26 +302,35 @@ void DashcoinWallet::transactionsReply(QNetworkReply *reply)
     str.replace(QRegularExpression("(?<=\\d)(?=[, ])"),"\"");
     QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
     QJsonArray jsonObj = jsonResponse.object()["result"].toObject()["transfers"].toArray();
-    QString amount = "";
-    QString address = "";
-    QString fee = "";
-    QString txhash = "";
     ui->transactions_table->setRowCount(jsonObj.size());
-    for(int i=0;i<jsonObj.size();i++){
+    int col = 0;
+    for(int i=jsonObj.size()-1;i>=0;i--){
         QString address_str = jsonObj.at(i).toObject()["address"].toString();
         QTableWidgetItem *amount =  new QTableWidgetItem(fixBalance(jsonObj.at(i).toObject()["amount"].toString())+" DSH");
         QTableWidgetItem *address = new QTableWidgetItem(address_str);
         QTableWidgetItem *fee = new QTableWidgetItem(fixBalance(jsonObj.at(i).toObject()["fee"].toString())+ " DSH");
         QTableWidgetItem *txhash =  new QTableWidgetItem(jsonObj.at(i).toObject()["transactionHash"].toString());
+        QTableWidgetItem *date = new QTableWidgetItem(QDateTime::fromTime_t(jsonObj.at(i).toObject()["time"].toString().toInt()).toUTC().toString("MMM d yyyy"));
         QString type_str = "Send";
         if(address_str == ""){
             type_str = "Receive";
         }
         QTableWidgetItem *type = new QTableWidgetItem(type_str);
-        ui->transactions_table->setItem(i,1,type);
-        ui->transactions_table->setItem(i,2,amount);
-        ui->transactions_table->setItem(i, 3, fee);
-        ui->transactions_table->setItem(i,4,txhash);
-        ui->transactions_table->setItem(i,5,address);
+        col = jsonObj.size()-i-1;
+        ui->transactions_table->setItem(col,0,date);
+        ui->transactions_table->setItem(col,1,type);
+        ui->transactions_table->setItem(col,2,amount);
+        ui->transactions_table->setItem(col, 3, fee);
+        ui->transactions_table->setItem(col,4,txhash);
+        ui->transactions_table->setItem(col,5,address);
     }
+}
+
+void DashcoinWallet::sendReply(QNetworkReply *reply)
+{
+    QByteArray bytes = reply->readAll();
+    QString str = QString::fromUtf8(bytes.data(), bytes.size()).simplified();
+    str.replace(QRegularExpression("(?<=:)\\s()(?=\\d)"),"\"");
+    str.replace(QRegularExpression("(?<=\\d)(?=[, ])"),"\"");
+    qDebug() << str;
 }
