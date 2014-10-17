@@ -388,8 +388,23 @@
                      <height>16777215</height>
                     </size>
                    </property>
+                   <property name="wrapping">
+                    <bool>false</bool>
+                   </property>
+                   <property name="frame">
+                    <bool>true</bool>
+                   </property>
                    <property name="buttonSymbols">
                     <enum>QAbstractSpinBox::UpDownArrows</enum>
+                   </property>
+                   <property name="accelerated">
+                    <bool>true</bool>
+                   </property>
+                   <property name="showGroupSeparator" stdset="0">
+                    <bool>false</bool>
+                   </property>
+                   <property name="suffix">
+                    <string> DSH</string>
                    </property>
                    <property name="decimals">
                     <number>8</number>
@@ -409,6 +424,9 @@
                      <width>150</width>
                      <height>16777215</height>
                     </size>
+                   </property>
+                   <property name="suffix">
+                    <string> DSH</string>
                    </property>
                    <property name="maximum">
                     <double>100.000000000000000</double>

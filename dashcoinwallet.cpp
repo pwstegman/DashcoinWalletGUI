@@ -342,8 +342,8 @@ void DashcoinWallet::on_sendconfirm_btn_clicked()
     ui->fee_txt->setDisabled(false);
     ui->address_txt->clear();
     ui->paymentid_txt->clear();
-    ui->amount_txt->clear();
-    ui->fee_txt->clear();
+    ui->amount_txt->setValue(0);
+    ui->fee_txt->setValue(0);
     qDebug() << "Address: " << address << " Pid: " << paymentid << " Amount: " << amount << " Fee" << fee;
 }
 
