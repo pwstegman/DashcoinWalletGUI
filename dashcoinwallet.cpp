@@ -36,6 +36,8 @@ DashcoinWallet::DashcoinWallet(QWidget *parent) :
     tosatoshi("12345600");
     tosatoshi("12345.6789");
     tosatoshi("1.1");
+    tosatoshi("123456.87654321");
+    tosatoshi("0.123456789");
 }
 
 DashcoinWallet::~DashcoinWallet()
@@ -344,8 +346,15 @@ void DashcoinWallet::tosatoshi(QString str)
     if(str.contains(".")){
         QString right = str.mid(str.indexOf(".")+1);
         QString left = str.mid(0,str.length()-right.length()-1);
-        qDebug() << "L: " << left << " R: " << right;
+        QString moreZeros = "";
+        if(right.length() < 8){
+            moreZeros = QString(8-right.length(),'0');
+        }
+        right = right+moreZeros;
+        right = right.mid(0,8);
+        qDebug() << "Right has: " << right.length();
+        qDebug() << str+"*10^8="+left+right;
     }else{
-        qDebug() << str+"00000000";
+        qDebug() << str+"*10^8="+str+"00000000";
     }
 }
