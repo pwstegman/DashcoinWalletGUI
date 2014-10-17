@@ -71,7 +71,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>3</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideNone</enum>
@@ -588,6 +588,9 @@
                <widget class="QTableWidget" name="transactions_table">
                 <property name="frameShadow">
                  <enum>QFrame::Sunken</enum>
+                </property>
+                <property name="editTriggers">
+                 <set>QAbstractItemView::NoEditTriggers</set>
                 </property>
                 <property name="columnCount">
                  <number>6</number>
