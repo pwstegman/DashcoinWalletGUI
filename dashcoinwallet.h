@@ -45,6 +45,7 @@ private:
     void showAllWallet();
     void loadAddress();
     void loadTransactions();
+    void tosatoshi(QString str);
     QString fixBalance(QString str);
     QProcess *daemon;
     QProcess *wallet;

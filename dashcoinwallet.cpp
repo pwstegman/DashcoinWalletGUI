@@ -32,6 +32,10 @@ DashcoinWallet::DashcoinWallet(QWidget *parent) :
     ui->statusBar->addPermanentWidget(syncLabel);
     ui->statusBar->addPermanentWidget(messageLabel,1);
     loadFile();
+
+    tosatoshi("12345600");
+    tosatoshi("12345.6789");
+    tosatoshi("1.1");
 }
 
 DashcoinWallet::~DashcoinWallet()
@@ -333,4 +337,15 @@ void DashcoinWallet::sendReply(QNetworkReply *reply)
     str.replace(QRegularExpression("(?<=:)\\s()(?=\\d)"),"\"");
     str.replace(QRegularExpression("(?<=\\d)(?=[, ])"),"\"");
     qDebug() << str;
+}
+
+void DashcoinWallet::tosatoshi(QString str)
+{
+    if(str.contains(".")){
+        QString right = str.mid(str.indexOf(".")+1);
+        QString left = str.mid(0,str.length()-right.length()-1);
+        qDebug() << "L: " << left << " R: " << right;
+    }else{
+        qDebug() << str+"00000000";
+    }
 }
