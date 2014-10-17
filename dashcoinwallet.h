@@ -36,6 +36,8 @@ private slots:
     void sendReply(QNetworkReply *reply);
     void on_send_btn_clicked();
 
+    void on_sendconfirm_btn_clicked();
+
 private:
     Ui::DashcoinWallet *ui;
     void loadFile();
@@ -45,7 +47,7 @@ private:
     void showAllWallet();
     void loadAddress();
     void loadTransactions();
-    void tosatoshi(QString str);
+    QString fixamount(QString str);
     QString fixBalance(QString str);
     QProcess *daemon;
     QProcess *wallet;

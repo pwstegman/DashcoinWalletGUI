@@ -25,6 +25,7 @@ DashcoinWallet::DashcoinWallet(QWidget *parent) :
     walletRunning = false;
     synced = false;
     hideWallet();
+    ui->sendconfirm_btn->hide();
     syncLabel = new QLabel(this);
     messageLabel = new QLabel(this);
     syncLabel->setContentsMargins(9,0,9,0);
@@ -32,12 +33,6 @@ DashcoinWallet::DashcoinWallet(QWidget *parent) :
     ui->statusBar->addPermanentWidget(syncLabel);
     ui->statusBar->addPermanentWidget(messageLabel,1);
     loadFile();
-
-    tosatoshi("12345600");
-    tosatoshi("12345.6789");
-    tosatoshi("1.1");
-    tosatoshi("123456.87654321");
-    tosatoshi("0.123456789");
 }
 
 DashcoinWallet::~DashcoinWallet()
@@ -267,15 +262,6 @@ void DashcoinWallet::showAllWallet()
     walletTimer->start(10000);
 }
 
-void DashcoinWallet::on_send_btn_clicked()
-{
-    QString address = ui->address_txt->text();
-    QString paymentid = ui->paymentid_txt->text();
-    QString amount = ui->amount_txt->text();
-    QString fee = ui->fee_txt->text();
-    qDebug() << "Address: " << address << " Pid: " << paymentid << " Amount: " << amount << " Fee" << fee;
-}
-
 void DashcoinWallet::loadAddress()
 {
     QFile addressFile(QDir::currentPath ()+"/wallet.bin.address.txt");
@@ -332,6 +318,35 @@ void DashcoinWallet::transactionsReply(QNetworkReply *reply)
     }
 }
 
+void DashcoinWallet::on_send_btn_clicked()
+{
+    ui->send_btn->setDisabled(true);
+    ui->address_txt->setDisabled(true);
+    ui->paymentid_txt->setDisabled(true);
+    ui->amount_txt->setDisabled(true);
+    ui->fee_txt->setDisabled(true);
+    ui->sendconfirm_btn->show();
+}
+
+void DashcoinWallet::on_sendconfirm_btn_clicked()
+{
+    QString address = ui->address_txt->text();
+    QString paymentid = ui->paymentid_txt->text();
+    QString amount = ui->amount_txt->text();
+    QString fee = ui->fee_txt->text();
+    ui->sendconfirm_btn->hide();
+    ui->send_btn->setDisabled(false);
+    ui->address_txt->setDisabled(false);
+    ui->paymentid_txt->setDisabled(false);
+    ui->amount_txt->setDisabled(false);
+    ui->fee_txt->setDisabled(false);
+    ui->address_txt->clear();
+    ui->paymentid_txt->clear();
+    ui->amount_txt->clear();
+    ui->fee_txt->clear();
+    qDebug() << "Address: " << address << " Pid: " << paymentid << " Amount: " << amount << " Fee" << fee;
+}
+
 void DashcoinWallet::sendReply(QNetworkReply *reply)
 {
     QByteArray bytes = reply->readAll();
@@ -341,7 +356,7 @@ void DashcoinWallet::sendReply(QNetworkReply *reply)
     qDebug() << str;
 }
 
-void DashcoinWallet::tosatoshi(QString str)
+QString DashcoinWallet::fixamount(QString str)
 {
     if(str.contains(".")){
         QString right = str.mid(str.indexOf(".")+1);
@@ -352,9 +367,8 @@ void DashcoinWallet::tosatoshi(QString str)
         }
         right = right+moreZeros;
         right = right.mid(0,8);
-        qDebug() << "Right has: " << right.length();
-        qDebug() << str+"*10^8="+left+right;
+        return left+right;
     }else{
-        qDebug() << str+"*10^8="+str+"00000000";
+        return str+"00000000";
     }
 }
