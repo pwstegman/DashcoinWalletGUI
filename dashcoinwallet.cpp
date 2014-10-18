@@ -14,6 +14,7 @@
 #include <QCloseEvent>
 #include <QJsonArray>
 #include <QRegularExpression>
+#include <QPlainTextEdit>
 
 DashcoinWallet::DashcoinWallet(QWidget *parent) :
     QMainWindow(parent),
@@ -45,7 +46,14 @@ void DashcoinWallet::loadFile()
     daemon = new QProcess(this);
     connect(daemon, SIGNAL(started()),this, SLOT(daemonStarted()));
     connect(daemon, SIGNAL(finished(int , QProcess::ExitStatus)),this, SLOT(daemonFinished()));
+    daemon->setProcessChannelMode(QProcess::MergedChannels);
+    //connect(daemon,SIGNAL(readyReadStandardOutput()),this,SLOT(daemonOut()));
     daemon->start(QDir::currentPath ()+"/dashcoind", QStringList() << "");
+}
+
+void DashcoinWallet::daemonOut()
+{
+    //ui->daemonstatus_txt->appendPlainText(daemon->readAllStandardOutput()+"\n");
 }
 
 void DashcoinWallet::daemonStarted(){
@@ -60,9 +68,7 @@ void DashcoinWallet::daemonStarted(){
 void DashcoinWallet::daemonFinished()
 {
     daemonRunning = false;
-    qDebug() << "daemon finished";
     if(tryingToClose == true){
-        qDebug() << "quitting";
         qApp->quit();
     }
 }
@@ -111,7 +117,7 @@ void DashcoinWallet::on_openWallet_btn_clicked()
         wallet = new QProcess(this);
         connect(wallet, SIGNAL(started()),this, SLOT(walletStarted()));
         connect(wallet, SIGNAL(finished(int , QProcess::ExitStatus)),this, SLOT(walletFinished()));
-        QFile walletFile(QDir::currentPath ()+"/wallet.bin");
+        QFile walletFile(QDir::currentPath ()+"/wallet.bin.keys");
         if(!walletFile.exists()){
             messageLabel->setText("No wallet found. Generating new wallet...");
             walletGenerate = new QProcess(this);
@@ -152,7 +158,6 @@ void DashcoinWallet::walletFinished()
 
 void DashcoinWallet::closeEvent(QCloseEvent *event)
  {
-    qDebug() << "exiting now event";
     if(walletRunning == true){
         wallet->kill();
     }
@@ -195,9 +200,13 @@ void DashcoinWallet::balanceReply(QNetworkReply *reply)
     unlocked_balance = fixBalance(unlocked_balance);
     ui->balance_txt->setText(balance+" DSH");
     ui->balance_unlocked_txt->setText(unlocked_balance+" DSH");
-    if(showingWallet == true){
+    if(showingWallet == true && str != ""){
+        messageLabel->setText("");
         showAllWallet();
         showingWallet = false;
+    }
+    if(str == ""){
+        messageLabel->setText("Syncing wallet");
     }
 }
 
@@ -236,6 +245,9 @@ void DashcoinWallet::showWallet()
 {
     ui->passwordBox->hide();
     loadWalletData();
+    QTimer *walletTimer = new QTimer(this);
+    connect(walletTimer, SIGNAL(timeout()), this, SLOT(loadWalletData()));
+    walletTimer->start(10000);
     showingWallet = true;
 }
 
@@ -249,15 +261,10 @@ void DashcoinWallet::loadWalletData(){
 
 void DashcoinWallet::showAllWallet()
 {
-    messageLabel->setText("Wallet connected");
-    qDebug() << "Started wallet timer";
     ui->balance->show();
     ui->sendForm->show();
     ui->in_address->show();
     ui->transactions_table->show();
-    QTimer *walletTimer = new QTimer(this);
-    connect(walletTimer, SIGNAL(timeout()), this, SLOT(loadWalletData()));
-    walletTimer->start(10000);
 }
 
 void DashcoinWallet::loadAddress()
@@ -300,7 +307,7 @@ void DashcoinWallet::transactionsReply(QNetworkReply *reply)
         QTableWidgetItem *address = new QTableWidgetItem(address_str);
         QTableWidgetItem *fee = new QTableWidgetItem(fixBalance(jsonObj.at(i).toObject()["fee"].toString())+ " DSH");
         QTableWidgetItem *txhash =  new QTableWidgetItem(jsonObj.at(i).toObject()["transactionHash"].toString());
-        QTableWidgetItem *date = new QTableWidgetItem(QDateTime::fromTime_t(jsonObj.at(i).toObject()["time"].toString().toInt()).toUTC().toString("MMM d yyyy"));
+        QTableWidgetItem *date = new QTableWidgetItem(QDateTime::fromTime_t(jsonObj.at(i).toObject()["time"].toString().toInt()).toUTC().toString("MMM d yyyy hh:mm:ss"));
         QString type_str = "Send";
         if(address_str == ""){
             type_str = "Receive";
@@ -334,8 +341,6 @@ void DashcoinWallet::on_sendconfirm_btn_clicked()
     QString amount = fixamount(ui->amount_txt->cleanText());
     QString fee = fixamount(ui->fee_txt->cleanText());
     QString mixin = ui->mixin_txt->cleanText();
-    qDebug() << "Amount: " << ui->amount_txt->cleanText();
-    qDebug() << "Fixed amount: " << fixamount(ui->amount_txt->cleanText());
     ui->sendconfirm_btn->setText("Sending...");
     sendLoad = new QNetworkAccessManager(this);
     connect(sendLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(sendReply(QNetworkReply*)));
@@ -344,7 +349,6 @@ void DashcoinWallet::on_sendconfirm_btn_clicked()
     QByteArray data = jsonData.toJson();
     QNetworkRequest request = QNetworkRequest(QUrl("http://127.0.0.1:49253/json_rpc"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
-    qDebug() << "Request: " << data;
     sendLoad->post(request, data);
 }
 
@@ -355,13 +359,12 @@ void DashcoinWallet::sendReply(QNetworkReply *reply)
     QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
     if(jsonResponse.object().contains("error")){
         QString error = jsonResponse.object()["error"].toObject()["message"].toString();
-        messageLabel->setText("Error sending transaction: "+error);
+        ui->statusBar->showMessage("Error sending transaction: "+error,10000);
     }else{
         QString txhash = jsonResponse.object()["result"].toObject()["tx_hash"].toString();
-        messageLabel->setText("Successfully sent transaction "+txhash);
+        ui->statusBar->showMessage("Successfully sent transaction "+txhash,10000);
     }
 
-    qDebug() << str;
 
     ui->sendconfirm_btn->hide();
     ui->sendconfirm_btn->setText("Confirm");
@@ -393,4 +396,24 @@ QString DashcoinWallet::fixamount(QString str)
     }else{
         return str+"00000000";
     }
+}
+
+void DashcoinWallet::loadDaemonLog()
+{
+    QFile file(QDir::currentPath ()+"/dashcoind.log");
+    if(!file.exists() || !file.open(QIODevice::ReadOnly)){
+        qDebug() << "Couldn't load file";
+    }
+    file.seek(file.size()-1);
+    int count = 0;
+    int lines = 30;
+    while ( (count < lines) && (file.pos() > 0) ) {
+        QString ch = file.read(1);
+        file.seek(file.pos()-2);
+        if (ch == "\n")
+            count++;
+    }
+    QByteArray bytes = file.readAll();
+    QString str = QString::fromUtf8(bytes.data(), bytes.size());
+    file.close();
 }

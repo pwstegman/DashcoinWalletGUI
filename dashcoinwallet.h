@@ -35,8 +35,9 @@ private slots:
     void transactionsReply(QNetworkReply *reply);
     void sendReply(QNetworkReply *reply);
     void on_send_btn_clicked();
-
+    void daemonOut();
     void on_sendconfirm_btn_clicked();
+    void loadDaemonLog();
 
 private:
     Ui::DashcoinWallet *ui;
