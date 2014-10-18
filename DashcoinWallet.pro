@@ -20,3 +20,5 @@ SOURCES += main.cpp\
 HEADERS  += dashcoinwallet.h
 
 FORMS    += dashcoinwallet.ui
+
+win32:RC_ICONS += dashcoin.ico
