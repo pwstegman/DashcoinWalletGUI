@@ -170,7 +170,6 @@ void DashcoinWallet::closeEvent(QCloseEvent *event)
 
 void DashcoinWallet::loadBalance()
 {
-    qDebug() << "Loading balance";
     balanceLoad = new QNetworkAccessManager(this);
     connect(balanceLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(balanceReply(QNetworkReply*)));
     QString dataStr = "{\"jsonrpc\": \"2.0\", \"method\":\"getbalance\", \"id\": \"test\"}";
@@ -241,7 +240,6 @@ void DashcoinWallet::showWallet()
 }
 
 void DashcoinWallet::loadWalletData(){
-    qDebug() << "Loaded wallet data";
     if(walletRunning == true){
         loadBalance();
         loadAddress();
@@ -332,9 +330,35 @@ void DashcoinWallet::on_sendconfirm_btn_clicked()
 {
     QString address = ui->address_txt->text();
     QString paymentid = ui->paymentid_txt->text();
-    QString amount = ui->amount_txt->text();
-    QString fee = ui->fee_txt->text();
+    QString amount = fixamount(ui->amount_txt->cleanText());
+    QString fee = fixamount(ui->fee_txt->cleanText());
+    QString mixin = ui->mixin_txt->cleanText();
+    qDebug() << "Amount: " << ui->amount_txt->cleanText();
+    qDebug() << "Fixed amount: " << fixamount(ui->amount_txt->cleanText());
+    ui->sendconfirm_btn->setText("Sending...");
+    sendLoad = new QNetworkAccessManager(this);
+    connect(sendLoad, SIGNAL(finished(QNetworkReply*)),this, SLOT(sendReply(QNetworkReply*)));
+    QString dataStr = "{ \"jsonrpc\":\"2.0\", \"method\":\"transfer\", \"params\":{ \"destinations\":[ { \"amount\":"+amount+", \"address\":\""+address+"\" } ], \"payment_id\":\""+paymentid+"\", \"fee\":"+fee+", \"mixin\":"+mixin+", \"unlock_time\":0 } }";
+    QJsonDocument jsonData = QJsonDocument::fromJson(dataStr.toUtf8());
+    QByteArray data = jsonData.toJson();
+    QNetworkRequest request = QNetworkRequest(QUrl("http://127.0.0.1:49253/json_rpc"));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
+    qDebug() << "Request: " << data;
+    sendLoad->post(request, data);
+}
+
+void DashcoinWallet::sendReply(QNetworkReply *reply)
+{
+    QByteArray bytes = reply->readAll();
+    QString str = QString::fromUtf8(bytes.data(), bytes.size()).simplified();
+    QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
+    QString txhash = jsonResponse.object()["tx_hash"].toString();
+    qDebug() << "Sent";
+    qDebug() << str;
+    qDebug() << txhash;
+
     ui->sendconfirm_btn->hide();
+    ui->sendconfirm_btn->setText("Confirm");
     ui->send_btn->setDisabled(false);
     ui->address_txt->setDisabled(false);
     ui->paymentid_txt->setDisabled(false);
@@ -343,17 +367,8 @@ void DashcoinWallet::on_sendconfirm_btn_clicked()
     ui->address_txt->clear();
     ui->paymentid_txt->clear();
     ui->amount_txt->setValue(0);
-    ui->fee_txt->setValue(0);
-    qDebug() << "Address: " << address << " Pid: " << paymentid << " Amount: " << amount << " Fee" << fee;
-}
+    ui->fee_txt->setValue(15);
 
-void DashcoinWallet::sendReply(QNetworkReply *reply)
-{
-    QByteArray bytes = reply->readAll();
-    QString str = QString::fromUtf8(bytes.data(), bytes.size()).simplified();
-    str.replace(QRegularExpression("(?<=:)\\s()(?=\\d)"),"\"");
-    str.replace(QRegularExpression("(?<=\\d)(?=[, ])"),"\"");
-    qDebug() << str;
 }
 
 QString DashcoinWallet::fixamount(QString str)
