@@ -71,7 +71,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>3</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideNone</enum>
@@ -436,7 +436,24 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="6" column="1">
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="label_12">
+                   <property name="text">
+                    <string>Mixin:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QSpinBox" name="mixin_txt">
+                   <property name="maximumSize">
+                    <size>
+                     <width>150</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="1">
                   <widget class="QPushButton" name="send_btn">
                    <property name="maximumSize">
                     <size>
@@ -449,7 +466,7 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="7" column="1">
+                 <item row="6" column="1">
                   <widget class="QPushButton" name="sendconfirm_btn">
                    <property name="maximumSize">
                     <size>
@@ -471,23 +488,6 @@
                    </property>
                    <property name="flat">
                     <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <widget class="QSpinBox" name="mixin_txt">
-                   <property name="maximumSize">
-                    <size>
-                     <width>150</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="0">
-                  <widget class="QLabel" name="label_12">
-                   <property name="text">
-                    <string>Mixin:</string>
                    </property>
                   </widget>
                  </item>
@@ -712,6 +712,19 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>password_txt</tabstop>
+  <tabstop>openWallet_btn</tabstop>
+  <tabstop>address_txt</tabstop>
+  <tabstop>paymentid_txt</tabstop>
+  <tabstop>amount_txt</tabstop>
+  <tabstop>fee_txt</tabstop>
+  <tabstop>mixin_txt</tabstop>
+  <tabstop>send_btn</tabstop>
+  <tabstop>sendconfirm_btn</tabstop>
+  <tabstop>transactions_table</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

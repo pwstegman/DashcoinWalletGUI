@@ -323,6 +323,7 @@ void DashcoinWallet::on_send_btn_clicked()
     ui->paymentid_txt->setDisabled(true);
     ui->amount_txt->setDisabled(true);
     ui->fee_txt->setDisabled(true);
+    ui->mixin_txt->setDisabled(true);
     ui->sendconfirm_btn->show();
 }
 
@@ -352,10 +353,15 @@ void DashcoinWallet::sendReply(QNetworkReply *reply)
     QByteArray bytes = reply->readAll();
     QString str = QString::fromUtf8(bytes.data(), bytes.size()).simplified();
     QJsonDocument jsonResponse = QJsonDocument::fromJson(str.toUtf8());
-    QString txhash = jsonResponse.object()["tx_hash"].toString();
-    qDebug() << "Sent";
+    if(jsonResponse.object().contains("error")){
+        QString error = jsonResponse.object()["error"].toObject()["message"].toString();
+        messageLabel->setText("Error sending transaction: "+error);
+    }else{
+        QString txhash = jsonResponse.object()["result"].toObject()["tx_hash"].toString();
+        messageLabel->setText("Successfully sent transaction "+txhash);
+    }
+
     qDebug() << str;
-    qDebug() << txhash;
 
     ui->sendconfirm_btn->hide();
     ui->sendconfirm_btn->setText("Confirm");
@@ -364,6 +370,7 @@ void DashcoinWallet::sendReply(QNetworkReply *reply)
     ui->paymentid_txt->setDisabled(false);
     ui->amount_txt->setDisabled(false);
     ui->fee_txt->setDisabled(false);
+    ui->mixin_txt->setDisabled(false);
     ui->address_txt->clear();
     ui->paymentid_txt->clear();
     ui->amount_txt->setValue(0);
