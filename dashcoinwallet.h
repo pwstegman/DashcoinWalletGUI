@@ -39,6 +39,8 @@ private slots:
     void on_sendconfirm_btn_clicked();
     void loadDaemonLog();
 
+    void on_generate_btn_clicked();
+
 private:
     Ui::DashcoinWallet *ui;
     void loadFile();
@@ -48,6 +50,7 @@ private:
     void showAllWallet();
     void loadAddress();
     void loadTransactions();
+    void setOpenWalletText();
     QString fixamount(QString str);
     QString fixBalance(QString str);
     QProcess *daemon;
@@ -64,6 +67,7 @@ private:
     bool walletRunning;
     bool synced;
     bool showingWallet;
+    int closeAttempts;
 };
 
 #endif // DASHCOINWALLET_H

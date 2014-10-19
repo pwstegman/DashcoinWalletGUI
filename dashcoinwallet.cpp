@@ -14,7 +14,7 @@
 #include <QCloseEvent>
 #include <QJsonArray>
 #include <QRegularExpression>
-#include <QPlainTextEdit>
+#include <QMessageBox>
 
 DashcoinWallet::DashcoinWallet(QWidget *parent) :
     QMainWindow(parent),
@@ -25,15 +25,18 @@ DashcoinWallet::DashcoinWallet(QWidget *parent) :
     daemonRunning = false;
     walletRunning = false;
     synced = false;
+    closeAttempts = 0;
     hideWallet();
     ui->sendconfirm_btn->hide();
+    ui->generateWidget->hide();
     syncLabel = new QLabel(this);
     messageLabel = new QLabel(this);
     syncLabel->setContentsMargins(9,0,9,0);
     messageLabel->setContentsMargins(9,0,9,0);
     ui->statusBar->addPermanentWidget(syncLabel);
-    ui->statusBar->addPermanentWidget(messageLabel,1);
+    ui->statusBar->addPermanentWidget(messageLabel, 1);
     loadFile();
+    setOpenWalletText();
 }
 
 DashcoinWallet::~DashcoinWallet()
@@ -49,6 +52,15 @@ void DashcoinWallet::loadFile()
     daemon->setProcessChannelMode(QProcess::MergedChannels);
     //connect(daemon,SIGNAL(readyReadStandardOutput()),this,SLOT(daemonOut()));
     daemon->start(QDir::currentPath ()+"/dashcoind", QStringList() << "");
+}
+
+void DashcoinWallet::setOpenWalletText()
+{
+    QFile walletFile(QDir::currentPath ()+"/wallet.bin.keys");
+    if(!walletFile.exists()){
+        ui->passwordBox->hide();
+        ui->generateWidget->show();
+    }
 }
 
 void DashcoinWallet::daemonOut()
@@ -112,12 +124,23 @@ void DashcoinWallet::on_openWallet_btn_clicked()
 {
     //they clicked the open wallet button
     if(synced == true){
-        pass = ui->password_txt->text();
-        ui->password_txt->setText("");
+        QFile walletFile(QDir::currentPath ()+"/wallet.bin.keys");
+        if(!walletFile.exists()){
+            QString passConf = ui->pass_confirm_txt->text();
+            pass = ui->pass_gen_txt->text();
+            ui->pass_gen_txt->setText("");
+            ui->pass_confirm_txt->setText("");
+            if(passConf != pass){
+                messageLabel->setText("Passwords do not match");
+                return;
+            }
+        }else{
+            pass = ui->password_txt->text();
+            ui->password_txt->setText("");
+        }
         wallet = new QProcess(this);
         connect(wallet, SIGNAL(started()),this, SLOT(walletStarted()));
         connect(wallet, SIGNAL(finished(int , QProcess::ExitStatus)),this, SLOT(walletFinished()));
-        QFile walletFile(QDir::currentPath ()+"/wallet.bin.keys");
         if(!walletFile.exists()){
             messageLabel->setText("No wallet found. Generating new wallet...");
             walletGenerate = new QProcess(this);
@@ -134,7 +157,7 @@ void DashcoinWallet::on_openWallet_btn_clicked()
 
 void DashcoinWallet::killWalletGenerate()
 {
-    messageLabel->setText("Generated wallet file wallet.bin. Now starting wallet server on port 49253.");
+    messageLabel->setText("Generated wallet file wallet.bin.");
     walletGenerate->kill();
     wallet->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--wallet-file=wallet.bin" << "--pass="+pass << "--rpc-bind-port=49253");
     pass = "";
@@ -158,12 +181,25 @@ void DashcoinWallet::walletFinished()
 
 void DashcoinWallet::closeEvent(QCloseEvent *event)
  {
+    closeAttempts += 1;
     if(walletRunning == true){
         wallet->kill();
     }
+    if(closeAttempts > 1){
+        QMessageBox msgBox;
+        msgBox.setText("The blockchain is not done saving.");
+        msgBox.setInformativeText("Would you like to force quit?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+        int ret = msgBox.exec();
+        if(ret == QMessageBox::Yes){
+            event->accept();
+            return;
+        }
+    }
     if(daemonRunning == true){
+        daemon->write("exit\n");
         if(tryingToClose == false){
-            daemon->write("exit\n");
             tryingToClose = true;
             syncLabel->setText("Saving blockchain...");
         }
@@ -244,6 +280,7 @@ void DashcoinWallet::hideWallet()
 void DashcoinWallet::showWallet()
 {
     ui->passwordBox->hide();
+    ui->generateWidget->hide();
     loadWalletData();
     QTimer *walletTimer = new QTimer(this);
     connect(walletTimer, SIGNAL(timeout()), this, SLOT(loadWalletData()));
@@ -416,4 +453,9 @@ void DashcoinWallet::loadDaemonLog()
     QByteArray bytes = file.readAll();
     QString str = QString::fromUtf8(bytes.data(), bytes.size());
     file.close();
+}
+
+void DashcoinWallet::on_generate_btn_clicked()
+{
+    on_openWallet_btn_clicked();
 }
