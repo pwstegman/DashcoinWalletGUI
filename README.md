@@ -11,3 +11,5 @@ Wallet GUI for Dashcoin.
 <li>Shows transaction history</li>
 <li>Sends Dashcoin</li>
 </ul>
+
+Windows builds: https://sourceforge.net/p/dashcoinwalletgui/
