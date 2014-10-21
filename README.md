@@ -13,7 +13,7 @@ Wallet GUI for Dashcoin.
 
 Windows builds: https://sourceforge.net/p/dashcoinwalletgui/
 
-To contribute to the developement of the Dashcoin GUI Wallet you can donate to the addresses below. Thank you to anyone who has donated, you are much appreciated!
+To contribute to the developement of the Dashcoin GUI Wallet, you can donate to the addresses below. Thank you to anyone who has donated, you are much appreciated!
 
 
 - BTC: `1H9tTANozxN2HcbQpmPb8Ussj1mS325eLW`<br/>
