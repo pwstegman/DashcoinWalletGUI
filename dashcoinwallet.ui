@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Dashcoin Wallet GUI v1.0.2</string>
+   <string>Dashcoin Wallet GUI v1.1.1</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -43,13 +43,13 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QWidget" name="widget_2" native="true">
+     <widget class="QWidget" name="panel_main" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
-        <widget class="QTabWidget" name="tabWidget">
+        <widget class="QTabWidget" name="tabs_wallet">
          <property name="font">
           <font>
            <underline>false</underline>
@@ -88,7 +88,7 @@
          <property name="movable">
           <bool>true</bool>
          </property>
-         <widget class="QWidget" name="Overview">
+         <widget class="QWidget" name="tab_overview">
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -139,7 +139,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QWidget" name="overviewPanel" native="true">
+            <widget class="QWidget" name="panel_overview" native="true">
              <layout class="QFormLayout" name="formLayout">
               <property name="fieldGrowthPolicy">
                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
@@ -148,33 +148,51 @@
                <number>18</number>
               </property>
               <item row="0" column="0">
-               <widget class="QWidget" name="passwordBox" native="true">
-                <layout class="QHBoxLayout" name="horizontalLayout">
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
+               <widget class="QWidget" name="panel_password" native="true">
+                <property name="minimumSize">
+                 <size>
+                  <width>15</width>
+                  <height>15</height>
+                 </size>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_14">
                  <item>
-                  <widget class="QLineEdit" name="password_txt">
+                  <widget class="QLabel" name="label_16">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
                    <property name="text">
+                    <string>Open Wallet</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="select_wallet">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="editable">
+                    <bool>false</bool>
+                   </property>
+                   <property name="currentText">
                     <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="txt_password_open">
+                   <property name="enabled">
+                    <bool>true</bool>
                    </property>
                    <property name="echoMode">
                     <enum>QLineEdit::Password</enum>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                   </property>
-                   <property name="dragEnabled">
-                    <bool>false</bool>
                    </property>
                    <property name="placeholderText">
                     <string>Password</string>
@@ -182,17 +200,99 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="openWallet_btn">
+                  <widget class="QPushButton" name="btn_open">
                    <property name="text">
-                    <string>Open Wallet</string>
+                    <string>Open wallet</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="verticalSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>10</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_17">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>New Wallet</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="panel_generate" native="true">
+                   <layout class="QVBoxLayout" name="verticalLayout_15">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLineEdit" name="txt_name_generate">
+                      <property name="toolTip">
+                       <string>Alphanumeric characters only</string>
+                      </property>
+                      <property name="placeholderText">
+                       <string>Name (example: mywallet)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="txt_password_generate">
+                      <property name="echoMode">
+                       <enum>QLineEdit::Password</enum>
+                      </property>
+                      <property name="placeholderText">
+                       <string>Password</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="txt_password_generate_confirm">
+                      <property name="echoMode">
+                       <enum>QLineEdit::Password</enum>
+                      </property>
+                      <property name="placeholderText">
+                       <string>Confirm password</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btn_generate">
+                   <property name="text">
+                    <string>Create wallet</string>
                    </property>
                   </widget>
                  </item>
                 </layout>
                </widget>
               </item>
-              <item row="2" column="0">
-               <widget class="QWidget" name="balance" native="true">
+              <item row="1" column="0">
+               <widget class="QWidget" name="panel_balance" native="true">
                 <property name="minimumSize">
                  <size>
                   <width>10</width>
@@ -230,7 +330,7 @@
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QLabel" name="balance_txt">
+                  <widget class="QLabel" name="txt_balance">
                    <property name="font">
                     <font>
                      <pointsize>12</pointsize>
@@ -258,7 +358,7 @@
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QLabel" name="balance_unlocked_txt">
+                  <widget class="QLabel" name="txt_balance_unlocked">
                    <property name="font">
                     <font>
                      <pointsize>12</pointsize>
@@ -274,22 +374,16 @@
                 </layout>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QWidget" name="generateWidget" native="true">
+              <item row="2" column="0">
+               <widget class="QWidget" name="panel_close_wallet" native="true">
                 <property name="minimumSize">
                  <size>
                   <width>10</width>
                   <height>10</height>
                  </size>
                 </property>
-                <layout class="QFormLayout" name="formLayout_7">
-                 <property name="fieldGrowthPolicy">
-                  <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-                 </property>
+                <layout class="QVBoxLayout" name="verticalLayout_17">
                  <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
                   <number>0</number>
                  </property>
                  <property name="rightMargin">
@@ -298,30 +392,10 @@
                  <property name="bottomMargin">
                   <number>0</number>
                  </property>
-                 <item row="0" column="0">
-                  <widget class="QLineEdit" name="pass_gen_txt">
-                   <property name="echoMode">
-                    <enum>QLineEdit::Password</enum>
-                   </property>
-                   <property name="placeholderText">
-                    <string>Password</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLineEdit" name="pass_confirm_txt">
-                   <property name="echoMode">
-                    <enum>QLineEdit::Password</enum>
-                   </property>
-                   <property name="placeholderText">
-                    <string>Confirm</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QPushButton" name="generate_btn">
+                 <item>
+                  <widget class="QPushButton" name="btn_close_wallet">
                    <property name="text">
-                    <string>Generate Wallet</string>
+                    <string>Close wallet</string>
                    </property>
                   </widget>
                  </item>
@@ -333,7 +407,7 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="Send">
+         <widget class="QWidget" name="tab_send">
           <attribute name="title">
            <string>Send Dashcoin</string>
           </attribute>
@@ -384,7 +458,7 @@
             <widget class="QWidget" name="senddashcoin" native="true">
              <layout class="QFormLayout" name="formLayout_3">
               <item row="0" column="0" colspan="2">
-               <widget class="QWidget" name="sendForm" native="true">
+               <widget class="QWidget" name="form_send" native="true">
                 <property name="minimumSize">
                  <size>
                   <width>10</width>
@@ -403,7 +477,7 @@
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="address_txt">
+                  <widget class="QLineEdit" name="txt_send_address">
                    <property name="clearButtonEnabled">
                     <bool>true</bool>
                    </property>
@@ -417,7 +491,7 @@
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QLineEdit" name="paymentid_txt">
+                  <widget class="QLineEdit" name="txt_send_paymentid">
                    <property name="clearButtonEnabled">
                     <bool>true</bool>
                    </property>
@@ -431,7 +505,7 @@
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QDoubleSpinBox" name="amount_txt">
+                  <widget class="QDoubleSpinBox" name="txt_send_amount">
                    <property name="maximumSize">
                     <size>
                      <width>150</width>
@@ -475,7 +549,7 @@
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="QDoubleSpinBox" name="fee_txt">
+                  <widget class="QDoubleSpinBox" name="txt_send_fee">
                    <property name="maximumSize">
                     <size>
                      <width>150</width>
@@ -501,7 +575,7 @@
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="QSpinBox" name="mixin_txt">
+                  <widget class="QSpinBox" name="txt_send_mixin">
                    <property name="maximumSize">
                     <size>
                      <width>150</width>
@@ -511,7 +585,7 @@
                   </widget>
                  </item>
                  <item row="5" column="1">
-                  <widget class="QPushButton" name="send_btn">
+                  <widget class="QPushButton" name="btn_send">
                    <property name="maximumSize">
                     <size>
                      <width>150</width>
@@ -524,28 +598,65 @@
                   </widget>
                  </item>
                  <item row="6" column="1">
-                  <widget class="QPushButton" name="sendconfirm_btn">
+                  <widget class="QWidget" name="panel_send_confirm" native="true">
                    <property name="maximumSize">
                     <size>
                      <width>150</width>
                      <height>16777215</height>
                     </size>
                    </property>
-                   <property name="text">
-                    <string>Confirm</string>
-                   </property>
-                   <property name="checkable">
-                    <bool>false</bool>
-                   </property>
-                   <property name="autoDefault">
-                    <bool>false</bool>
-                   </property>
-                   <property name="default">
-                    <bool>false</bool>
-                   </property>
-                   <property name="flat">
-                    <bool>false</bool>
-                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_16">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QPushButton" name="btn_send_confirm">
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Confirm</string>
+                      </property>
+                      <property name="checkable">
+                       <bool>false</bool>
+                      </property>
+                      <property name="autoDefault">
+                       <bool>false</bool>
+                      </property>
+                      <property name="default">
+                       <bool>false</bool>
+                      </property>
+                      <property name="flat">
+                       <bool>false</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="btn_send_cancel">
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Cancel</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </widget>
                  </item>
                 </layout>
@@ -556,7 +667,7 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="Receive">
+         <widget class="QWidget" name="tab_receive">
           <attribute name="title">
            <string>Receive Dashcoin</string>
           </attribute>
@@ -625,7 +736,7 @@
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="in_address_txt">
+                  <widget class="QLineEdit" name="txt_receive_address">
                    <property name="enabled">
                     <bool>true</bool>
                    </property>
@@ -651,7 +762,7 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="Transactions">
+         <widget class="QWidget" name="tab_transactions">
           <attribute name="title">
            <string>Transactions</string>
           </attribute>
@@ -702,7 +813,7 @@
             <widget class="QWidget" name="widget_9" native="true">
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <widget class="QTableWidget" name="transactions_table">
+               <widget class="QTableWidget" name="table_transactions">
                 <property name="frameShadow">
                  <enum>QFrame::Sunken</enum>
                 </property>
@@ -749,7 +860,7 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tab">
+         <widget class="QWidget" name="tab_contribute">
           <attribute name="title">
            <string>Contribute</string>
           </attribute>
@@ -839,21 +950,99 @@
                     </font>
                    </property>
                    <property name="text">
-                    <string>Please send donations to the address below.  Thank you to all who donate. You are much appreciated!</string>
+                    <string>Donations can be sent to the addresses below.  Thank you to all who donate. You are much appreciated!</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="lineEdit">
-                   <property name="text">
-                    <string>D7rzsczcaaaV6gVRUBRVvFPPTUUV2EYxV6oyfzSzxYBW6gfh4GKC4M5SvYFFPfhbbJfkrcUCaTgpjK11rXVuK56CGCU8Ew8</string>
-                   </property>
-                   <property name="echoMode">
-                    <enum>QLineEdit::Normal</enum>
-                   </property>
-                   <property name="readOnly">
-                    <bool>true</bool>
-                   </property>
+                  <widget class="QWidget" name="widget_2" native="true">
+                   <layout class="QFormLayout" name="formLayout_7">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_18">
+                      <property name="font">
+                       <font>
+                        <weight>75</weight>
+                        <bold>true</bold>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>DSH:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLineEdit" name="txt_donate_address_dsh">
+                      <property name="focusPolicy">
+                       <enum>Qt::NoFocus</enum>
+                      </property>
+                      <property name="text">
+                       <string>D7rzsczcaaaV6gVRUBRVvFPPTUUV2EYxV6oyfzSzxYBW6gfh4GKC4M5SvYFFPfhbbJfkrcUCaTgpjK11rXVuK56CGCU8Ew8</string>
+                      </property>
+                      <property name="echoMode">
+                       <enum>QLineEdit::Normal</enum>
+                      </property>
+                      <property name="cursorPosition">
+                       <number>0</number>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_19">
+                      <property name="font">
+                       <font>
+                        <weight>75</weight>
+                        <bold>true</bold>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>BTC:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QLineEdit" name="txt_donate_address_btc">
+                      <property name="focusPolicy">
+                       <enum>Qt::NoFocus</enum>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::DefaultContextMenu</enum>
+                      </property>
+                      <property name="acceptDrops">
+                       <bool>true</bool>
+                      </property>
+                      <property name="autoFillBackground">
+                       <bool>false</bool>
+                      </property>
+                      <property name="text">
+                       <string>1H9tTANozxN2HcbQpmPb8Ussj1mS325eLW</string>
+                      </property>
+                      <property name="frame">
+                       <bool>true</bool>
+                      </property>
+                      <property name="cursorPosition">
+                       <number>0</number>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </widget>
                  </item>
                 </layout>
@@ -871,7 +1060,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
+  <widget class="QMenuBar" name="bar_menu">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -881,21 +1070,18 @@
     </rect>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="bar_status"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>password_txt</tabstop>
-  <tabstop>openWallet_btn</tabstop>
-  <tabstop>address_txt</tabstop>
-  <tabstop>paymentid_txt</tabstop>
-  <tabstop>amount_txt</tabstop>
-  <tabstop>fee_txt</tabstop>
-  <tabstop>mixin_txt</tabstop>
-  <tabstop>send_btn</tabstop>
-  <tabstop>sendconfirm_btn</tabstop>
-  <tabstop>transactions_table</tabstop>
+  <tabstop>tabs_wallet</tabstop>
+  <tabstop>txt_send_address</tabstop>
+  <tabstop>txt_send_paymentid</tabstop>
+  <tabstop>txt_send_amount</tabstop>
+  <tabstop>txt_send_fee</tabstop>
+  <tabstop>txt_send_mixin</tabstop>
+  <tabstop>btn_send</tabstop>
+  <tabstop>table_transactions</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -3,8 +3,9 @@
 
 #include <QMainWindow>
 #include <QProcess>
-#include <QNetworkReply>
 #include <QLabel>
+#include <QTimer>
+#include <QtNetwork>
 
 namespace Ui {
 class DashcoinWallet;
@@ -22,52 +23,51 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 private slots:
-    void replyFinished(QNetworkReply *reply);
-    void daemonStarted();
-    void daemonFinished();
-    void loadBlockHeight();
-    void loadWalletData();
-    void killWalletGenerate();
-    void on_openWallet_btn_clicked();
-    void walletStarted();
-    void walletFinished();
-    void balanceReply(QNetworkReply *reply);
-    void transactionsReply(QNetworkReply *reply);
-    void sendReply(QNetworkReply *reply);
-    void on_send_btn_clicked();
-    void daemonOut();
-    void on_sendconfirm_btn_clicked();
-    void loadDaemonLog();
+    void on_btn_open_clicked();
+    void on_btn_generate_clicked();
+    void on_btn_send_clicked();
+    void on_btn_send_confirm_clicked();
+    void on_btn_send_cancel_clicked();
+    void done_generating();
+    void daemon_started();
+    void daemon_finished();
+    void wallet_started();
+    void wallet_finished();
+    void parse_daemon_log();
+    void load_wallet_data();
+    void rpcReply(QNetworkReply *reply);
+    void on_btn_close_wallet_clicked();
 
-    void on_generate_btn_clicked();
+    void on_txt_password_open_returnPressed();
 
 private:
     Ui::DashcoinWallet *ui;
-    void loadFile();
-    void loadBalance();
-    void hideWallet();
-    void showWallet();
-    void showAllWallet();
-    void loadAddress();
-    void loadTransactions();
-    void setOpenWalletText();
-    QString fixamount(QString str);
-    QString fixBalance(QString str);
-    QProcess *daemon;
-    QProcess *wallet;
-    QProcess *walletGenerate;
-    QString pass;
+    void init_ui();
+    void init_wallet();
+    void show_wallet(bool b);
+    void load_wallets();
+    void start_daemon();
+    void load_balance();
+    void load_address();
+    void load_transactions();
+    QString fix_amount(QString str);
+    QString load_daemon_log();
+    QString fix_balance(QString str);
+    bool synced;
+    bool daemon_is_running;
+    bool wallet_is_running;
+    bool opening_wallet;
     QLabel *syncLabel;
     QLabel *messageLabel;
-    QNetworkAccessManager *balanceLoad;
-    QNetworkAccessManager *transactionsLoad;
-    QNetworkAccessManager *sendLoad;
+    QString current_wallet;
+    QProcess *daemon;
+    QProcess *wallet_generate;
+    QProcess *wallet;
     bool tryingToClose;
-    bool daemonRunning;
-    bool walletRunning;
-    bool synced;
-    bool showingWallet;
-    int closeAttempts;
+    QTimer *parse_daemon_timer;
+    QNetworkAccessManager *loader_balance;
+    QNetworkAccessManager *loader_transactions;
+    QNetworkAccessManager *loader_send;
 };
 
 #endif // DASHCOINWALLET_H

@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2014-10-06T19:28:19
+# Project created by QtCreator 2014-10-26T15:02:42
 #
 #-------------------------------------------------
 
@@ -10,7 +10,7 @@ QT += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = DashcoinWallet
+TARGET = DashcoinWalletGUI2
 TEMPLATE = app
 
 
