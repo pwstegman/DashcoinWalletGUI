@@ -16,6 +16,7 @@
 #include <QRegularExpressionValidator>
 #include <QtCore/qmath.h>
 #include <QtNetwork>
+#include <QFileInfo>
 
 DashcoinWallet::DashcoinWallet(QWidget *parent) :
     QMainWindow(parent),
@@ -49,14 +50,28 @@ void DashcoinWallet::init_wallet()
 void DashcoinWallet::start_daemon()
 {
     syncLabel->setText("Starting daemon");
+
+    QString daemon_path = "./dashcoind.exe";
+    QFileInfo check_file(daemon_path);
+    if (!check_file.exists() || !check_file.isFile()) {
+        syncLabel->setText("Error: Please make sure dashcoind.exe is in the same directory as the wallet GUI");
+        return;
+    }
+
     daemon = new QProcess(this);
+
     connect(daemon, SIGNAL(started()),this, SLOT(daemon_started()));
-    connect(daemon, SIGNAL(finished(int , QProcess::ExitStatus)),this, SLOT(daemon_finished()));
-    daemon->start(QDir::currentPath ()+"/dashcoind", QStringList() << "");
+    connect(daemon, SIGNAL(finished(int , QProcess::ExitStatus)), this, SLOT(daemon_finished()));
+
+    daemon->start(daemon_path, QStringList() << "");
+
+    qDebug() << QDir::currentPath();
 }
 
 void DashcoinWallet::daemon_started()
 {
+    qDebug() << "Daemon process started, starting log parser";
+
     daemon_is_running = true;
     parse_daemon_timer = new QTimer(this);
     connect(parse_daemon_timer, SIGNAL(timeout()), this, SLOT(parse_daemon_log()));
@@ -448,32 +463,25 @@ QString DashcoinWallet::load_daemon_log()
 void DashcoinWallet::parse_daemon_log()
 {
     if(!daemon_is_running || tryingToClose){
-        qDebug() << "Daemon log is not in a state to parse";
+        qDebug() << "Daemon is closing, skipping log parse";
         return;
     }
+
     QString log = load_daemon_log();
-    if(log.contains("SYNCHRONIZED OK") || log.contains("You are now synchronized with the network")){
+
+    if((log.contains("SYNCHRONIZED OK") || log.contains("You are now synchronized with the network"))
+            && log.lastIndexOf("SYNCHRONIZED OK") > log.lastIndexOf("days) behind")){
         synced = true;
         syncLabel->setText("Synced with network");
         messageLabel->setText("");
         parse_daemon_timer->stop();
-        return;
+    }else if(log.contains(QRegularExpression("(?<=Sync data(?!.*Sync data)).*(?=\\[)"))){
+        log.replace(QRegularExpression(".*Sync data returned unknown top block: \\d* -> \\d* \\[\\d* blocks \\("), "");
+        log.replace(QRegularExpression(" days.*"), "");
+        syncLabel->setText("Syncing with network (" + log + " days behind)");
+    }else{
+        qDebug() << "No sync status found";
     }
-    if(!log.contains(QRegularExpression("(?<=Sync data(?!.*Sync data)).*(?=\\[)"))){
-        qDebug() << "No parsable data";
-        return;
-    }
-    log.replace(QRegularExpression(".*Sync data returned.*:\\s(?=\\d)"),"");
-    log.replace(QRegularExpression("\\s\\[.*"),"");
-    QStringList result = log.split(" -> ");
-    qDebug() << result;
-    if(result.length() != 2){
-        qDebug() << "Error parsing data";
-        return;
-    }
-    QString percent = QString::number(qFloor(result[0].toDouble()/result[1].toDouble()*1000.0)/10.0);
-    syncLabel->setText("Syncing with network: "+percent+"%");
-
 }
 
 void DashcoinWallet::load_balance()
