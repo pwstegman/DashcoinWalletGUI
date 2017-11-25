@@ -41,9 +41,11 @@ DashcoinWallet::~DashcoinWallet()
 void DashcoinWallet::init_wallet()
 {
     load_wallets();
+
     synced = false;
     tryingToClose = false;
     daemon_is_running = false;
+
     start_daemon();
 }
 
@@ -64,15 +66,13 @@ void DashcoinWallet::start_daemon()
     connect(daemon, SIGNAL(finished(int , QProcess::ExitStatus)), this, SLOT(daemon_finished()));
 
     daemon->start(daemon_path, QStringList() << "");
-
-    qDebug() << QDir::currentPath();
 }
 
 void DashcoinWallet::daemon_started()
 {
-    qDebug() << "Daemon process started, starting log parser";
-
     daemon_is_running = true;
+
+    // Every 7 seconds, parse the daemon log
     parse_daemon_timer = new QTimer(this);
     connect(parse_daemon_timer, SIGNAL(timeout()), this, SLOT(parse_daemon_log()));
     parse_daemon_timer->start(7000);
@@ -94,18 +94,23 @@ void DashcoinWallet::daemon_finished()
 
 void DashcoinWallet::init_ui()
 {
-    ui->panel_generate->hide();
     ui->panel_send_confirm->hide();
     show_wallet(false);
+
+    // Add sync status and general message labels to the status bar
     syncLabel = new QLabel(this);
     messageLabel = new QLabel(this);
     syncLabel->setContentsMargins(9,0,9,0);
     messageLabel->setContentsMargins(9,0,9,0);
     ui->bar_status->addPermanentWidget(syncLabel);
     ui->bar_status->addPermanentWidget(messageLabel, 1);
+
+    // Validate send address
     QRegularExpression rx1("[a-zA-Z0-9]*");
     QValidator *alphaNum = new QRegularExpressionValidator(rx1, this);
     ui->txt_send_address->setValidator(alphaNum);
+
+    // Validate payment id
     QRegularExpression rx2("[a-fA-F0-9]*");
     QValidator *hexOnly = new QRegularExpressionValidator(rx2, this);
     ui->txt_send_paymentid->setValidator(hexOnly);
@@ -113,13 +118,20 @@ void DashcoinWallet::init_ui()
 
 void DashcoinWallet::show_wallet(bool b)
 {
+    // If showing wallet, show these items
     ui->panel_generate->setHidden(!b);
     ui->panel_balance->setHidden(!b);
+
+    // hide these items
     ui->panel_password->setHidden(b);
     ui->btn_close_wallet->setHidden(!b);
+
+    // enable these items
     ui->tab_send->setEnabled(b);
     ui->tab_receive->setEnabled(b);
     ui->tab_transactions->setEnabled(b);
+
+    // When hiding wallet, reset transactions and address
     if(!b){
         ui->table_transactions->setRowCount(0);
         ui->txt_receive_address->clear();
@@ -139,18 +151,28 @@ void DashcoinWallet::on_btn_open_clicked()
         return;
     }
 
+    QString wallet_path = "./simplewallet";
+    QFileInfo check_file(wallet_path);
+    if (!check_file.exists() || !check_file.isFile()) {
+        syncLabel->setText("Error: Please make sure simplewallet.exe is in the same directory as the wallet GUI");
+        return;
+    }
+
     ui->btn_open->setDisabled(true);
     ui->btn_open->setText("Opening wallet...");
     current_wallet = ui->select_wallet->currentText();
     QString pass = ui->txt_password_open->text();
     ui->txt_password_open->setText("");
+
     wallet = new QProcess(this);
     connect(wallet, SIGNAL(started()),this, SLOT(wallet_started()));
     connect(wallet, SIGNAL(finished(int , QProcess::ExitStatus)),this, SLOT(wallet_finished()));
+
     messageLabel->setText("Opening wallet...");
+
     QStringList params;
     params << "--wallet-file=wallets/"+current_wallet+".bin" << "--password" << pass << "--rpc-bind-port=49253";
-    wallet->start(QDir::currentPath ()+"/simplewallet", params);
+    wallet->start(wallet_path, params);
 }
 
 void DashcoinWallet::on_btn_generate_clicked()
@@ -188,6 +210,8 @@ void DashcoinWallet::on_btn_generate_clicked()
         return;
     }
 
+    // TODO: Generate wallets folder if doesn't exist
+
     messageLabel->setText("Generating wallet "+current_wallet+"...");
     wallet_generate = new QProcess(this);
     wallet_generate->start(QDir::currentPath ()+"/simplewallet", QStringList() << "--generate-new-wallet" << "wallets/"+current_wallet+".bin" << "--password" << pass1);
@@ -213,37 +237,47 @@ void DashcoinWallet::on_btn_send_confirm_clicked()
         messageLabel->setText("Invalid amount");
         return;
     }
+
     QString address = ui->txt_send_address->text();
     QString paymentid = ui->txt_send_paymentid->text();
     QString amount = fix_amount(ui->txt_send_amount->cleanText());
     QString fee = fix_amount(ui->txt_send_fee->cleanText());
     QString mixin = ui->txt_send_mixin->cleanText();
+
     ui->txt_send_address->clear();
     ui->txt_send_paymentid->clear();
     ui->txt_send_amount->setValue(0);
     ui->txt_send_fee->setValue(15);
     ui->txt_send_mixin->setValue(0);
     ui->btn_send_confirm->setText("Sending...");
+
     loader_send = new QNetworkAccessManager(this);
     connect(loader_send, SIGNAL(finished(QNetworkReply*)),this, SLOT(rpcReply(QNetworkReply*)));
+
     QString dataStr = "{ \"jsonrpc\":\"2.0\", \"method\":\"transfer\", \"id\":\"send\", \"params\":{ \"destinations\":[ { \"amount\":"+amount+", \"address\":\""+address+"\" } ], \"payment_id\":\""+paymentid+"\", \"fee\":"+fee+", \"mixin\":"+mixin+", \"unlock_time\":0 } }";
     QJsonDocument jsonData = QJsonDocument::fromJson(dataStr.toUtf8());
     QByteArray data = jsonData.toJson();
+
     QNetworkRequest request = QNetworkRequest(QUrl("http://127.0.0.1:49253/json_rpc"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
+
     loader_send->post(request, data);
+
     qDebug() << "Sent send request " << dataStr ;
 }
 
 void DashcoinWallet::on_btn_send_cancel_clicked()
 {
     bool b = false;
+
     ui->btn_send->setHidden(b);
+
     ui->txt_send_address->setDisabled(b);
     ui->txt_send_paymentid->setDisabled(b);
     ui->txt_send_amount->setDisabled(b);
     ui->txt_send_fee->setDisabled(b);
     ui->txt_send_mixin->setDisabled(b);
+
     ui->panel_send_confirm->setHidden(!b);
 }
 
@@ -263,12 +297,16 @@ void DashcoinWallet::on_btn_close_wallet_clicked()
 void DashcoinWallet::load_wallets()
 {
     ui->select_wallet->clear();
-    QStringList filter_name("*.bin.keys");
+
+    QStringList filter_name;
+    filter_name << "*.bin.wallet";
+    filter_name << "*.bin.keys";
     QDir directory_wallets(QDir::currentPath ()+"/wallets");
     QStringList list_wallets = directory_wallets.entryList(filter_name);
+
     for(int i=0;i<list_wallets.length();i++){
         QString cur = list_wallets[i];
-        ui->select_wallet->addItem(cur.mid(0,cur.length()-9),cur);
+        ui->select_wallet->addItem(cur.mid(0,cur.lastIndexOf(".bin")), cur);
     }
 }
 
@@ -318,6 +356,7 @@ void DashcoinWallet::wallet_started()
     messageLabel->setText("Opening wallet...");
     opening_wallet = true;
     wallet_is_running = true;
+
     load_wallet_data();
     QTimer *wallet_timer = new QTimer(this);
     connect(wallet_timer, SIGNAL(timeout()), this, SLOT(load_wallet_data()));
@@ -343,7 +382,6 @@ void DashcoinWallet::load_wallet_data(){
     load_balance();
     load_address();
     load_transactions();
-
 }
 
 void DashcoinWallet::rpcReply(QNetworkReply *reply)
@@ -469,8 +507,11 @@ void DashcoinWallet::parse_daemon_log()
 
     QString log = load_daemon_log();
 
-    if((log.contains("SYNCHRONIZED OK") || log.contains("You are now synchronized with the network"))
-            && log.lastIndexOf("SYNCHRONIZED OK") > log.lastIndexOf("days) behind")){
+    bool syncedFound = log.contains("SYNCHRONIZED OK") || log.contains("now synchronized with the network");
+    bool syncedLast = log.lastIndexOf("SYNCHRONIZED OK") > log.lastIndexOf("days) behind");
+    syncedLast = syncedLast || log.lastIndexOf("now synchronized with the network") > log.lastIndexOf("days) behind");
+
+    if(syncedFound && syncedLast){
         synced = true;
         syncLabel->setText("Synced with network");
         messageLabel->setText("");
