@@ -151,7 +151,7 @@ void DashcoinWallet::on_btn_open_clicked()
         return;
     }
 
-    QString wallet_path = "./simplewallet";
+    QString wallet_path = "./simplewallet.exe";
     QFileInfo check_file(wallet_path);
     if (!check_file.exists() || !check_file.isFile()) {
         syncLabel->setText("Error: Please make sure simplewallet.exe is in the same directory as the wallet GUI");
@@ -204,8 +204,10 @@ void DashcoinWallet::on_btn_generate_clicked()
         return;
     }
 
-    QFile file_wallet(QDir::currentPath ()+"/wallets/"+current_wallet+".bin.keys");
-    if(file_wallet.exists()){
+    QStringList filter_name(current_wallet+".*");
+    QDir directory_wallets(QDir::currentPath ()+"/wallets");
+    QStringList list_wallets = directory_wallets.entryList(filter_name);
+    if(list_wallets.length() != 0){
         messageLabel->setText("A wallet with the name "+current_wallet+" already exists");
         return;
     }
@@ -539,7 +541,15 @@ void DashcoinWallet::load_balance()
 
 void DashcoinWallet::load_address()
 {
-    QFile addressFile(QDir::currentPath ()+"/wallets/"+current_wallet+".bin.address.txt");
+    QString path = QDir::currentPath ()+"/wallets/"+current_wallet+".bin.address";
+
+    QFileInfo check_file(path);
+    if (!check_file.exists() || !check_file.isFile()) {
+        // Try old version with .txt extension
+        path = QDir::currentPath ()+"/wallets/"+current_wallet+".bin.address.txt";
+    }
+
+    QFile addressFile(path);
     if(!addressFile.exists() || !addressFile.open(QIODevice::ReadOnly)){
         ui->txt_receive_address->setText("Cannot load address");
     }else{
