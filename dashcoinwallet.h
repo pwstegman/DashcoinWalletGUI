@@ -24,6 +24,8 @@ private slots:
     void daemonError(QProcess::ProcessError error);
     void walletGenRead();
     void walletGenError(QProcess::ProcessError error);
+    void walletOpenRead();
+    void walletOpenError(QProcess::ProcessError error);
 
 private:
     Ui::DashcoinWallet *ui;
@@ -31,9 +33,12 @@ private:
     void initUI();
     void initDaemon();
     void generateWallet(QString name, QString pass);
+    void openWallet(QString name, QString pass);
     QProcess *daemon;
     QProcess *walletgen;
+    QProcess *walletopen;
     QLabel *statusbar_message;
+    QString *wallet_rpc_port;
 };
 
 #endif // DASHCOINWALLET_H

@@ -19,10 +19,12 @@ DashcoinWallet::~DashcoinWallet(){
 void DashcoinWallet::init(){
     ui->balance_section->hide();
 
+    wallet_rpc_port = new QString("49253");
+
     initUI();
     // initDaemon();
-    generateWallet("test.bin", "test");
-
+    // generateWallet("test.bin", "nope");
+    openWallet("test.bin", "test");
 }
 
 /* =================================
@@ -42,8 +44,6 @@ void DashcoinWallet::initUI(){
 
 void DashcoinWallet::initDaemon(){
     QString program = "cmd.exe";
-    QStringList arguments;
-    arguments << "";
 
     daemon = new QProcess();
 
@@ -77,8 +77,6 @@ void DashcoinWallet::daemonError(QProcess::ProcessError error){
 
 void DashcoinWallet::generateWallet(QString name, QString pass){
     QString program = "cmd.exe";
-    QStringList arguments;
-    arguments << "";
 
     walletgen = new QProcess();
 
@@ -108,5 +106,43 @@ void DashcoinWallet::walletGenRead(){
 
 void DashcoinWallet::walletGenError(QProcess::ProcessError error){
     qDebug() << "Wallet generation error: " << error;
+    // TODO: Show errors in GUI
+}
+
+
+/* =================================
+             Wallet Open
+   ================================= */
+
+void DashcoinWallet::openWallet(QString name, QString pass){
+    QString program = "cmd.exe";
+
+    walletopen = new QProcess();
+
+    walletopen->setProcessChannelMode(QProcess::MergedChannels);
+
+    connect(walletopen, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(walletOpenError(QProcess::ProcessError)));
+    connect(walletopen, SIGNAL(readyRead()), this, SLOT(walletOpenRead()));
+
+    walletopen->start(program);
+
+    // TODO: Use rpc api
+    QString command = "simplewallet.exe --wallet-file \"" + name + "\" --password \"" + pass + "\" \n";
+    walletopen->write(command.toUtf8());
+    walletopen->closeWriteChannel();
+
+    // Notes: Current sync height eventually shows up on stdout. Rpc call for get height seems to return incorrect height
+}
+
+void DashcoinWallet::walletOpenRead(){
+    while(walletopen->canReadLine()){
+        QString line = walletopen->readLine();
+        qDebug() << "Simplewallet (open wallet)> " << line;
+    }
+}
+
+
+void DashcoinWallet::walletOpenError(QProcess::ProcessError error){
+    qDebug() << "Wallet open error: " << error;
     // TODO: Show errors in GUI
 }
