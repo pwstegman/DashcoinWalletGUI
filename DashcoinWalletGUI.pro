@@ -10,12 +10,12 @@ QT += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = DashcoinWalletGUI2
+TARGET = DashcoinWalletGUI
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        dashcoinwallet.cpp
+SOURCES += main.cpp \
+    dashcoinwallet.cpp
 
 HEADERS  += dashcoinwallet.h
 
